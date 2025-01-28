@@ -1,0 +1,484 @@
+@media only screen and (max-width: 900px) {
+  .nav-pan {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .wallet-card-q div {
+    font-size: small;
+  }
+
+  .wallet-card-q tbody tr td {
+    font-size: small !important;
+  }
+
+  .s-dialod-box {
+    width: 80% !important;
+  }
+
+  .apk-download-btn {
+    width: 160px !important;
+    height: 50px !important;
+  }
+}
+
+@media (max-width: 850px) {
+  .tab-t-size {
+    font-size: small !important;
+    white-space: normal !important;
+  }
+}
+
+@font-face {
+  font-family: "DedicHeaderFont";
+  src: local("DedicHeaderFont"),
+    url(../fonts/ChunkFive-Regular.otf) format("opentype");
+}
+
+@font-face {
+  font-family: "regularFont";
+  src: local("regularFont"), url(../fonts/Pacifico.ttf) format("truetype");
+}
+
+@font-face {
+  font-family: "Charm";
+  src: local("Charm"), url(../fonts/Charm-Regular.ttf) format("truetype");
+}
+
+:root {
+  /* Colors */
+  --black: #09090c;
+  --grey: #a4b2bc;
+  --white: #fff;
+  --background: rgba(233, 221, 221, 0.37);
+}
+
+h1 {
+  font-family: Charm, Cochin, Georgia, Times, "Times New Roman", serif;
+  font-weight: 900;
+  font-size: 5vw;
+}
+
+h2 {
+  font-family: Charm, Cochin, Georgia, Times, "Times New Roman", serif;
+  font-size: 44px;
+  font-weight: 900;
+  color: #05321e;
+}
+
+.centered-content {
+  height: 100vh;
+  text-align: center;
+  margin: 20px;
+  padding: 20px;
+}
+
+.paystack-btn-green {
+  background-color: #05321e;
+  color: white;
+}
+
+.reg-button {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding: 5px;
+  margin-top: 10px;
+  background-color: #05321e;
+  border-radius: 20px;
+  color: white;
+  width: 200px;
+  left: 50%;
+  transform: translateX(-50%);
+  position: relative;
+  cursor: pointer;
+}
+
+.reg-captions {
+  font-weight: 900;
+  font-size: 26px;
+  color: #05321e;
+  margin-bottom: 20px;
+}
+
+.reg-radio {
+  padding: 5px;
+  margin: 10px;
+  background: #05321e;
+  border-color: #05321e;
+  background-color: #05321e;
+}
+
+.greating-card {
+  background: #05321e;
+}
+
+table {
+  border-collapse: collapse;
+  border: 1px solid rgb(230, 230, 230);
+  letter-spacing: 1px;
+  font-size: 0.8rem;
+  width: 100%;
+}
+
+td,
+th {
+  border: 1px solid rgb(255, 255, 255);
+  padding: 5px 10px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+th {
+  background-color: rgb(235, 235, 235);
+}
+
+td,
+th {
+  text-align: left;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+tr:nth-child(even) td {
+  background-color: rgb(250, 250, 250);
+}
+
+tr:nth-child(odd) td {
+  background-color: rgb(245, 245, 245);
+}
+
+th {
+  padding-top: 15px;
+  font-weight: bold;
+}
+
+caption {
+  padding: 10px;
+}
+
+tr.highlight td {
+  background-color: #a6a8bd;
+}
+
+.home-img {
+  float: right;
+  height: 100%;
+  width: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.land-bg .d_link {
+  color: white;
+}
+
+.land-bg .d_link:hover {
+  color: white;
+  background: #000;
+}
+
+.logo {
+  height: 180px;
+  position: relative;
+  margin: 20px;
+  margin-bottom: 50px;
+  width: 180px;
+  cursor: pointer;
+}
+
+.home-font {
+  font-size: 50px;
+  text-align: left;
+  margin: 10px;
+  padding-left: 20px;
+  padding-top: 20px;
+  color: rgb(136, 201, 204);
+}
+
+.pricing-cards {
+  padding: 10px;
+  /* margin: 10px; */
+  margin-top: 20px;
+  background-color: #ffffffec;
+  border: 1px solid #52050548; /* Set your desired border color */
+}
+
+.date-pick-style {
+  border-radius: 10px;
+}
+
+.pricing-cards tr {
+  padding-top: 20px;
+  padding-bottom: 50px;
+}
+
+.wallet-label-cards {
+  padding: 5px;
+  margin-top: 10px;
+  font-weight: bolder;
+}
+
+#intro-card,
+#navBar {
+  color: #191a68;
+  background-color: rgba(252, 250, 250, 0.507);
+  box-shadow: 0 4px 5px 0 rgba(20, 19, 19, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+}
+
+.custom_features_bg {
+  --s: 50px;
+  --c: #5304040c;
+  --_s: calc(2 * var(--s)) calc(2 * var(--s));
+  --_g: 35.36% 35.36% at;
+  --_c: #0000 66%, #13111125 68% 70%, #0000 72%;
+  background: radial-gradient(var(--_g) 100% 25%, var(--_c)) var(--s) var(--s) /
+      var(--_s),
+    radial-gradient(var(--_g) 0 75%, var(--_c)) var(--s) var(--s) / var(--_s),
+    radial-gradient(var(--_g) 100% 25%, var(--_c)) 0 0 / var(--_s),
+    radial-gradient(var(--_g) 0 75%, var(--_c)) 0 0 / var(--_s),
+    repeating-conic-gradient(var(--c) 0 25%, #0000 0 50%) 0 0 / var(--_s),
+    radial-gradient(var(--_c)) 0 calc(var(--s) / 2) / var(--s) var(--s) var(--c);
+  background-attachment: fixed;
+}
+
+.custom_footer_bg {
+  --u: 2.5vmin;
+  --c1: hsl(0deg 0% 0%);
+  --c2: hsl(212deg 4% 9%);
+  --c3: hsl(212deg 7% 36%);
+  --gp: 50% / calc(var(--u) * 5) calc(var(--u) * 10);
+  --bp: calc(var(--u) * -2.5) calc(var(--u) * -5);
+  height: 100%;
+  --bg: radial-gradient(circle at 50% 25%, var(--c2) 23%, #fff0 25% 100%)
+      var(--gp),
+    conic-gradient(from 270deg at 34% 46%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    conic-gradient(from 45deg at 66% 46%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    conic-gradient(from 180deg at 50% 80%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    conic-gradient(from 135deg at 50% 80%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    conic-gradient(from 0deg at 0% 20%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    conic-gradient(from -45deg at 100% 20%, var(--c2) 0 12.5%, #fff0 0 100%)
+      var(--gp),
+    linear-gradient(
+        180deg,
+        var(--c2) 0 4.5%,
+        #fff0 0 45.25%,
+        var(--c2) 0 50%,
+        #fff0 0% 100%
+      )
+      var(--gp),
+    radial-gradient(
+        circle at 50% 25%,
+        #fff0 0 25%,
+        var(--c2) 26% 32%,
+        #fff0 0 100%
+      )
+      var(--gp),
+    linear-gradient(165deg, var(--c3) -15%, var(--c1) 44%, #fff0 0 100%)
+      var(--gp),
+    linear-gradient(180deg, var(--c1) 50%, #fff0 0 100%) var(--gp);
+  background: var(--bg), var(--bg);
+  background-position: var(--bp), var(--bp), var(--bp), var(--bp), var(--bp),
+    var(--bp), var(--bp), var(--bp), var(--bp), var(--bp), var(--bp), 0 0, 0 0,
+    0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-color: var(--c2);
+}
+
+.custom_login {
+  --s: 60px;
+
+  --_g: #c4212121 83%, #ffffff 85% 99%, #b33838 101%;
+  background: radial-gradient(27% 29% at right, var(--_g)) calc(var(--s) / 2)
+      var(--s),
+    radial-gradient(27% 29% at left, var(--_g)) calc(var(--s) / -2) var(--s),
+    radial-gradient(29% 27% at top, var(--_g)) 0 calc(var(--s) / 2),
+    radial-gradient(29% 27% at bottom, var(--_g)) 0 calc(var(--s) / -2) #ffffff;
+  background-size: calc(2 * var(--s)) calc(2 * var(--s));
+}
+
+.roller {
+  height: 10rem;
+  line-height: 4rem;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+}
+
+#spare-time {
+  font-size: 3rem;
+  font-style: italic;
+  letter-spacing: 1rem;
+  margin-top: 15px;
+  color: #6fb8bb;
+}
+
+.roller #rolltext {
+  position: absolute;
+  top: 0;
+  animation: slide 10s infinite;
+}
+
+.w_roller {
+  height: 3rem;
+  line-height: 3rem;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #000000;
+}
+
+#spare-timeI {
+  font-size: 2rem;
+  font-style: italic;
+  letter-spacing: 0.2rem;
+  color: #c40404;
+}
+
+.w_roller #rolltextI {
+  position: absolute;
+  top: 0;
+  animation: slide 15s infinite;
+}
+
+@keyframes slide {
+  0% {
+    top: 0;
+  }
+  25% {
+    top: -4rem;
+  }
+  50% {
+    top: -8rem;
+  }
+  72.5% {
+    top: -12.25rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  h1 {
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 2.125rem;
+    font-weight: 900;
+  }
+
+  .ft {
+    font-size: 1.2rem !important;
+  }
+
+  .roller {
+    height: 8rem;
+    line-height: 2.125rem;
+  }
+
+  .w_roller {
+    height: 3rem;
+    line-height: 3rem;
+  }
+
+  #spare-time {
+    font-size: 3rem;
+    letter-spacing: 0.1rem;
+  }
+
+  #spare-timeI {
+    font-size: 2rem;
+    letter-spacing: 0.1rem;
+  }
+
+  .roller #rolltext {
+    animation: slide-mob 10s infinite;
+  }
+
+  .w_roller #rolltextI {
+    animation: w-slide-mob 15s infinite;
+  }
+
+  @keyframes w-slide-mob {
+    0% {
+      top: 0;
+    }
+    25% {
+      top: -3rem;
+    }
+    50% {
+      top: -5rem;
+    }
+    72.5% {
+      top: -12rem;
+    }
+  }
+
+  @keyframes slide-mob {
+    0% {
+      top: 0;
+    }
+    25% {
+      top: -2.125rem;
+    }
+    50% {
+      top: -4.25rem;
+    }
+    72.5% {
+      top: -6.375rem;
+    }
+  }
+}
+
+.slide {
+  /* background: linear-gradient(to bottom, #ffffff, #000000); */
+  background-color: #f6f7f2;
+  /* background-image: url("https://www.transparenttextures.com/patterns/arabesque.png"); */
+  /* This is mostly intended for prototyping; please download the pattern and re-host for production environments. Thank you! */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.slide h2 {
+  font-size: x-large;
+  font-weight: bold;
+}
+
+.sec-slide {
+  background-color: #ffffff;
+  background-image: url("https://www.transparenttextures.com/patterns/black-felt.png");
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  /* This is mostly intended for prototyping; please download the pattern and re-host for production environments. Thank you! */
+}
+
+.sec-slide h2 {
+  color: #c40404;
+  font-weight: bold;
+}
+
+.sec-slide p {
+  color: #09090c;
+  font-weight: bold;
+}
+
+.dashboard-contact {
+  height: 100%;
+  font-weight: bolder;
+  text-align: center;
+}

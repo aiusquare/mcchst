@@ -1,0 +1,9 @@
+@media (max-width: 576px) {
+  .text-field-on-mobile {
+    width: 90% !important;
+  }
+}
+
+.c-width {
+  width: 90vw !important;
+}

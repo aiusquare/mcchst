@@ -1,0 +1,36 @@
+.mobile-menu {
+  position: absolute;
+  align-items: flex-start;
+  display: inline-flex;
+  flex-direction: column;
+  left: 0;
+  z-index: 10;
+}
+
+.mobile-menu .menu-icon {
+  top: 0;
+  height: 67.43px;
+  object-fit: cover;
+  position: relative;
+  width: 64px;
+  cursor: pointer;
+}
+
+.mobile-menu .main-menu-bg {
+  background: #d6d6d6;
+  position: relative;
+  padding: 20px;
+}
+
+.mobile-menu .menu-bg {
+  background-color: #08331f;
+  padding: 10px;
+  position: relative;
+  margin: 10px;
+  width: 170px;
+  color: #ffffff;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}

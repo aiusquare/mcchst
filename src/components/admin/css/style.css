@@ -1,0 +1,23 @@
+.cus-button {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding: 2px;
+  margin-top: 5px;
+  background-color: #05321e;
+  border-radius: 20px;
+  color: white;
+  width: 150px;
+  position: relative;
+  cursor: pointer;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cus-date-picker {
+  border-radius: 10px;
+}
+
+.m-btn-color {
+  background: #05321e;
+  background-color: #05321e;
+}

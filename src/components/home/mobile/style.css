@@ -1,0 +1,574 @@
+.home-mobile {
+  background-color: #f3f1f1;
+  width: 100%;
+}
+
+.home-mobile .header-section {
+  background: linear-gradient(0deg, rgb(8, 51, 31) 50%, rgba(8, 51, 31, 0) 52%);
+  box-shadow: 0px 13px 30px 5px #00000040;
+  height: 850px;
+  position: relative;
+  width: 100%;
+}
+
+.home-mobile .news-section {
+  position: relative;
+}
+
+.home-mobile .carousel-section {
+  width: 100%;
+  /* height: 300px; */
+}
+
+.home-mobile .motive-section-tab {
+  background: #05321e;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+}
+
+.home-mobile .why-choose-muslim {
+  align-self: stretch;
+  color: transparent;
+  font-family: "Arbutus-Regular", Helvetica;
+  font-size: 4vw;
+  font-weight: 900;
+  position: relative;
+  text-align: center;
+  text-shadow: 0px 24px 22.1px #0000008c;
+  padding: 10px;
+}
+
+.home-mobile .span {
+  color: #ffffff;
+}
+
+.home-mobile .text-wrapper-2 {
+  color: #f5e559;
+}
+
+.home-mobile .global-prospect {
+  background-color: #eedb6e;
+  box-shadow: inset 0px 4px 45px #00000075;
+  display: flex;
+  height: 380px;
+  justify-content: center;
+  padding: 20px 20px 64px;
+  position: relative;
+  width: 85%;
+}
+
+.home-mobile .p {
+  color: #000000;
+  flex: 1;
+  font-family: "Arial-Regular", Helvetica;
+  font-weight: 380;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: justify;
+}
+
+.home-mobile .text-wrapper-3 {
+  color: #000000;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 128px;
+  font-weight: 380;
+  letter-spacing: 0;
+}
+
+.home-mobile .text-wrapper-5 {
+  font-family: "Arial-Black", Helvetica;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.home-mobile .integrity {
+  background-color: #eedb6e;
+  border-radius: 30px;
+  box-shadow: inset 0px 4px 45px #00000075;
+  display: flex;
+  height: 380px;
+  justify-content: center;
+  padding: 20px 20px 55px;
+  position: relative;
+  width: 85%;
+}
+
+.home-mobile .inclusive-community {
+  background-color: #eedb6e;
+  box-shadow: inset 0px 4px 45px #00000075;
+  display: flex;
+  height: 380px;
+  justify-content: center;
+  padding: 5px 20px;
+  position: relative;
+  width: 85%;
+}
+
+.home-mobile .menu-icon {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  top: 50px;
+  left: 2%;
+}
+
+.home-mobile .head-section {
+  height: 1400px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.home-mobile .overlap-group-2 {
+  height: 1400px;
+  position: relative;
+}
+
+.home-mobile .text-content {
+  padding: 2%;
+  margin-right: 2%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  justify-content: center;
+  position: absolute;
+  top: 425px;
+  width: 100%;
+}
+
+.home-mobile .empowering-futures {
+  align-self: stretch;
+  color: #f5f5f5;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 4vw;
+  font-weight: 400;
+  /* height: 120.5px; */
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+}
+
+.home-mobile .text-wrapper-6 {
+  color: #f5f5f5;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.home-mobile .text-wrapper-7 {
+  font-family: "Arial-Black", Helvetica;
+  font-weight: 900;
+}
+
+.home-mobile .text-wrapper-8 {
+  align-self: stretch;
+  color: #f5f5f5;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: justify;
+  padding: 20px;
+}
+
+.home-mobile .text-wrapper-9 {
+  align-self: stretch;
+  color: #05321e;
+  flex: 1;
+  font-family: "Arbutus-Regular", Helvetica;
+  font-size: 4.5vw;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin-top: 10px;
+  position: relative;
+  text-align: center;
+  /* white-space: nowrap; */
+}
+
+.sub-caption-color {
+  color: #746908;
+  font-style: italic;
+}
+
+.home-mobile .LOGO-MCCHST {
+  align-self: stretch;
+  flex: 1;
+  flex-grow: 1;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 45px;
+  position: absolute;
+  height: 200px;
+  width: 200px;
+}
+
+.home-mobile .button-instance {
+  position: absolute;
+  height: 47px !important;
+  left: 50% !important;
+  position: absolute !important;
+  top: 1172px !important;
+  width: 352px !important;
+}
+
+.home-mobile .footer-section {
+  left: 0;
+  position: relative;
+  width: 100%;
+}
+
+.home-mobile .footer {
+  background-color: transparent;
+  background-image: url(../../../pictures/footer_img.png);
+  background-position: 50% 50%;
+  background-size: cover;
+  height: 450px;
+  left: 0;
+  width: 100%;
+}
+
+.home-mobile .footer-bg {
+  background-color: #060606cf;
+  height: 100%;
+  width: 100%;
+}
+/* 
+.home-mobile .img {
+  height: 227px;
+  left: 0;
+  position: absolute;
+  top: 965px;
+  width: 100%;
+} */
+
+.home-mobile .links {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  margin-left: 20px;
+}
+
+.home-mobile .text-wrapper-10 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-right: -159.51px;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+  width: fit-content;
+}
+
+.home-mobile .link {
+  align-items: flex-start;
+  display: inline-flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 40px;
+  margin-right: -12.51px;
+  position: relative;
+}
+
+.home-mobile .text-wrapper-11 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.home-mobile .text-wrapper-12 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.home-mobile .div-wrapper {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  height: 79px;
+  justify-content: center;
+  padding: 10px;
+  position: absolute;
+  top: 80%;
+  width: 100%;
+  z-index: 10;
+}
+
+.home-mobile .text-wrapper-13 {
+  align-self: stretch;
+  color: #ffffff;
+  flex: 1;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+}
+
+.home-mobile .social-media {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.icons {
+  width: 48px;
+  height: 48px;
+  margin-right: 30px;
+  padding-top: 20px;
+  cursor: pointer;
+}
+
+.copyright-div {
+  background: #000000;
+  position: absolute;
+  padding: 10px;
+  bottom: 0;
+  color: white;
+  width: 100%;
+}
+
+.home-mobile .text-wrapper-14 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-right: -262.14px;
+  margin-top: -1px;
+  position: relative;
+  width: 353.06px;
+}
+
+.home-mobile .frame-3 {
+  height: 69.61px;
+  margin-left: -4.19px;
+  margin-right: -263.67px;
+  position: relative;
+  width: 358.78px;
+}
+
+.home-mobile .overlap-group-3 {
+  background-color: #014b28;
+  position: relative;
+  width: 100%;
+}
+
+.home-mobile .text-wrapper-15 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 5vw;
+  font-weight: 900;
+  position: absolute;
+  text-align: center;
+  top: 36px;
+  width: 100%;
+}
+
+.home-mobile .component {
+  height: 300px !important;
+  left: 88px !important;
+  position: absolute !important;
+  top: 943px !important;
+  width: 200px !important;
+}
+
+.home-mobile .officers-album-component {
+  height: 300px !important;
+}
+
+.home-mobile .officers-album-instance {
+  height: 123px !important;
+  width: 200px !important;
+}
+
+.home-mobile .officers-album-component-instance {
+  height: 123px !important;
+  top: 177px !important;
+  width: 200px !important;
+}
+
+.home-mobile .design-component-instance-node {
+  border-radius: 82.25px/82.09px !important;
+  height: 164px !important;
+  left: 18px !important;
+  top: 61px !important;
+  width: 164px !important;
+}
+
+.home-mobile .component-2 {
+  height: 123px !important;
+  left: 39px !important;
+  top: 81px !important;
+  width: 122px !important;
+}
+
+.home-mobile .component-3 {
+  left: 23px !important;
+}
+
+.home-mobile .component-4 {
+  margin-left: -13px !important;
+  margin-right: -13px !important;
+}
+
+.home-mobile .component-5 {
+  left: 75px !important;
+}
+
+.home-mobile .component-6 {
+  margin-left: -2.5px !important;
+  margin-right: -2.5px !important;
+}
+
+.home-mobile .component-7 {
+  height: 300px !important;
+  left: 88px !important;
+  position: absolute !important;
+  top: 570px !important;
+  width: 200px !important;
+}
+
+.home-mobile .component-8 {
+  margin-left: -6.5px !important;
+  margin-right: -6.5px !important;
+}
+
+.home-mobile .component-9 {
+  margin-left: -44.5px !important;
+  margin-right: -44.5px !important;
+}
+
+.home-mobile .component-10 {
+  height: 300px !important;
+  left: 88px !important;
+  position: absolute !important;
+  top: 197px !important;
+  width: 200px !important;
+}
+
+.home-mobile .component-11 {
+  margin-left: -19px !important;
+  margin-right: -19px !important;
+}
+
+.home-mobile .programs-section {
+  left: 0;
+  width: 100%;
+}
+
+.home-mobile .overlap-3 {
+  height: 636px;
+  position: relative;
+  width: 100%;
+}
+
+.home-mobile .overlap-group-wrapper {
+  height: 636px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.home-mobile .overlap-group-4 {
+  height: 636px;
+  position: relative;
+}
+
+.home-mobile .rectangle-3 {
+  background-color: #08331f;
+  height: 627px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.home-mobile .admin-block {
+  height: 625px;
+  left: 0;
+  object-fit: cover;
+  position: absolute;
+  top: 11px;
+  width: 100%;
+}
+
+.home-mobile .rectangle-4 {
+  background-color: #000000d9;
+  height: 631px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.home-mobile .flexcontainer {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  height: 478px;
+  position: absolute;
+  top: 20px;
+  padding: 10px;
+}
+
+.home-mobile .text {
+  align-self: stretch;
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 1.92px;
+  line-height: 19.6px;
+  position: relative;
+  text-align: left;
+}
+
+.home-mobile .text-wrapper-16 {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 1.92px;
+  line-height: 19.6px;
+}
+
+.home-mobile .text-wrapper-17 {
+  line-height: 16.2px;
+}

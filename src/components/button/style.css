@@ -1,0 +1,27 @@
+.button {
+  all: unset;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-sizing: border-box;
+  display: flex;
+  gap: 2px;
+  height: 35px;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative;
+  width: 200px;
+}
+
+.button .text-wrapper {
+  color: #000000;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 5;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}

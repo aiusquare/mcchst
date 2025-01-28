@@ -1,0 +1,46 @@
+@media (max-width: 576px) {
+  .counter-container span {
+    margin-left: 5px;
+    margin-right: 5px;
+    background-color: #2b2607;
+    box-shadow: inset 0px 4px 45px #00000075;
+    padding: 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+}
+
+.counter-container {
+  position: absolute;
+  margin-top: 20px;
+  margin-bottom: 50px;
+  color: white;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.counter-container span {
+  margin-left: 5px;
+  margin-right: 5px;
+  background-color: #2b2607;
+  box-shadow: inset 0px 4px 45px #00000075;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+/* Add this to your CSS or use a separate stylesheet */
+.countdown-item {
+  font-size: 24px;
+  margin: 5px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.countdown-item.expired {
+  transform: scale(1.2);
+  color: #ff0000;
+}

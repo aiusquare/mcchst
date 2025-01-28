@@ -1,0 +1,98 @@
+.officers-album {
+  height: 254px;
+  width: 169px;
+}
+
+.officers-album .overlap-group {
+  height: 254px;
+  position: relative;
+}
+
+.officers-album .rectangle {
+  background-color: #08331f;
+  border-radius: 10px 10px 0px 0px;
+  height: 104px;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 169px;
+}
+
+.officers-album .div {
+  background-color: #08331f;
+  height: 104px;
+  left: 0;
+  position: absolute;
+  top: 150px;
+  width: 169px;
+}
+
+.officers-album .ellipse {
+  background-color: #ffffff;
+  border-radius: 69.5px;
+  height: 139px;
+  left: 15px;
+  position: absolute;
+  top: 52px;
+  width: 139px;
+}
+
+.officers-album .mask-group {
+  height: 104px;
+  left: 33px;
+  position: absolute;
+  top: 69px;
+  width: 103px;
+}
+
+.officers-album .text-contenet {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 17px;
+  left: 8px;
+  padding: 0px 0px 2px;
+  position: absolute;
+  top: 11px;
+  width: 153px;
+}
+
+.officers-album .name {
+  color: #ffffff;
+  font-family: "Inter-Black", Helvetica;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+  width: fit-content;
+}
+
+.officers-album .frame {
+  align-items: center;
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  left: 60px;
+  padding: 2px;
+  position: absolute;
+  top: 232px;
+  width: 48px;
+}
+
+.officers-album .position {
+  color: #ffffff;
+  font-family: "Inter-Regular", Helvetica;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  margin-top: -1px;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}

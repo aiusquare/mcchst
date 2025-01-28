@@ -1,0 +1,59 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden; /* Prevents horizontal scroll */
+}
+
+@media (max-width: 768px) {
+  .admission .text-container {
+    width: 90% !important; /* Add !important for debugging */
+  }
+}
+
+@media (max-width: 480px) {
+  .admission .text-container {
+    width: 90% !important; /* Add !important for debugging */
+  }
+}
+
+.admission {
+  background-image: url("../../../pictures/cong_bg.jpg");
+  background-size: cover; /* Ensures the image covers the entire viewport */
+  background-position: center; /* Centers the image */
+  background-repeat: no-repeat; /* Ensures the image does not repeat */
+  background-attachment: fixed; /* Fixes the background image */
+  width: 100%;
+  min-height: 100vh; /* Ensures the section covers at least the viewport height */
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px; /* Adjust padding as needed */
+  color: black;
+}
+
+.admission .form-caption {
+  top: 200px;
+  position: relative;
+  color: black;
+  font-weight: 900;
+  padding: 20px;
+}
+
+.admission .text-container {
+  width: 70%;
+  text-align: center;
+  padding: 20px;
+  color: black;
+}
+
+.admission .button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* margin-top: 20px; Adjust margin as needed */
+}

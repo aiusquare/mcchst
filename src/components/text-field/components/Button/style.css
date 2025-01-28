@@ -1,0 +1,28 @@
+.button {
+  all: unset;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  padding: 10px;
+  margin: 10px;
+  width: 250px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.button .text-wrapper {
+  color: #000000;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}

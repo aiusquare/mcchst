@@ -1,0 +1,26 @@
+.menu-button {
+  align-items: center;
+  background-color: #eedb6e;
+  display: flex;
+  height: 40px;
+  justify-content: center;
+  width: 100px;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+  cursor: pointer;
+  border-radius: 15px;
+}
+
+.menu-button .text-wrapper {
+  color: #08331f;
+  font-family: "Arial-Regular", Helvetica;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  line-height: normal;
+  position: relative;
+  text-align: center;
+  white-space: nowrap;
+  width: fit-content;
+}

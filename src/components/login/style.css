@@ -1,0 +1,28 @@
+.index {
+  background-color: #05321e;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+}
+
+.index .container {
+  position: relative;
+  width: 100%;
+}
+
+.index .LOGO-MCCHST {
+  height: 180px;
+  position: relative;
+  margin: 20px;
+  margin-bottom: 50px;
+  width: 180px;
+  cursor: pointer;
+}
+
+.button-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

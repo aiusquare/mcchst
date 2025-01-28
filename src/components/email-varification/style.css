@@ -1,0 +1,34 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.index {
+  background-color: #05321e;
+  width: 100%;
+  overflow-y: scroll;
+  padding: 20px;
+}
+
+.index .container {
+  position: relative;
+  width: 100%;
+  background-color: #05321e;
+  padding: 20px;
+}
+
+.index .LOGO-MCCHST {
+  height: 180px;
+  position: relative;
+  margin: 20px;
+  margin-bottom: 50px;
+  width: 180px;
+}
+
+.button-container {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

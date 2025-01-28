@@ -1,0 +1,48 @@
+.cus-button {
+  padding-left: 20px;
+  padding-right: 20px;
+  padding: 2px;
+  margin-top: 5px;
+  background-color: #05321e;
+  border-radius: 20px;
+  color: white;
+  width: 150px;
+  position: relative;
+  cursor: pointer;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cus-date-picker {
+  border-radius: 10px;
+}
+
+.m-btn-color {
+  background: #05321e;
+  background-color: #05321e;
+}
+
+.avarter-img {
+  position: "absolute";
+  top: "0px";
+  left: "50%";
+}
+
+.gradient-custom {
+  /* fallback for old browsers */
+  background: #f6d365;
+
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(
+    to right bottom,
+    rgba(246, 211, 101, 1),
+    rgba(253, 160, 133, 1)
+  );
+
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(
+    to right bottom,
+    rgba(246, 211, 101, 1),
+    rgba(253, 160, 133, 1)
+  );
+}

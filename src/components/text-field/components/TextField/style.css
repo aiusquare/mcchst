@@ -1,0 +1,54 @@
+.text-field {
+  background-color: #ffffffc7;
+  border-radius: 10px;
+  box-shadow: inset 1px 0px 7.1px 1px #00000040;
+  height: 58px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 369px;
+  margin-bottom: 20px;
+}
+
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .text-field {
+    width: 95%; /* Set width to 95% for mobile devices */
+    max-width: 369px; /* Optionally, you can set a max-width for larger screens */
+  }
+}
+
+.text-field .overlap-group {
+  /* background-color: #f5f5f5; */
+  border-radius: 10px;
+  height: 44px;
+  left: 8px;
+  position: absolute;
+  top: 7px;
+  width: 47px;
+}
+
+.text-field .icon-user {
+  height: 26px;
+  left: 12px;
+  position: absolute;
+  top: 9px;
+  width: 24px;
+}
+
+.text-field .name {
+  background-color: transparent;
+  border: 0;
+  color: #000000;
+  font-family: "Inter", Helvetica;
+  font-size: 12px;
+  font-weight: 400;
+  left: 66px;
+  letter-spacing: 0;
+  line-height: normal;
+  padding: 10px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80%;
+}
