@@ -31,8 +31,15 @@ function StudentPortal(props) {
     if (!location.state || !location.state.userData) {
       navigate("/login");
     } else {
-      setUserEmail(location.state.userData.Email);
-      setUserData(location.state.userData);
+      // console.log("THE DATA", location.state.userData);
+      const isDataValidated = location.state.userData.Validated;
+
+      if (isDataValidated !== "yes") {
+        navigate("/validation");
+      } else {
+        setUserEmail(location.state.userData.Email);
+        setUserData(location.state.userData);
+      }
     }
   });
 

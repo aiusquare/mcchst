@@ -57,6 +57,7 @@ export const EmailVarificationComponent = () => {
               title: "Success!",
               text: message,
               icon: "success",
+              
               allowOutsideClick: false,
               allowEscapeKey: false,
             }).then((result) => {

@@ -21,14 +21,17 @@ import { useState } from "react";
 import request from "superagent";
 import DateInput from "../DateInput";
 import { programmes } from "../Arrays.js";
+// import { admissionProgrammes } from "../Arrays.js";
 import { loader } from "../LoadingSpinner.js";
 import Swal from "sweetalert2";
 import { Toast } from "../errorNotifier.js";
 import dayjs from "dayjs";
 import { downloadExcel } from "react-export-table-to-excel";
+import useResizeObserver from "../hooks/useResizeObserver.js";
 
 export default function ApplicationComponent() {
   const [rows, setRows] = useState([]);
+  const [containerRef, size] = useResizeObserver();
   const [init, setInit] = useState(false);
   const [applicationOpeningDate, setApplicationOpeningDate] =
     useState("01/01/2024");
@@ -312,7 +315,10 @@ export default function ApplicationComponent() {
   };
 
   return (
-    <div className="m-4 d-flex flex-column align-items-center">
+    <div
+      ref={containerRef}
+      className="m-4 d-flex flex-column align-items-center"
+    >
       <MDBCardBody>
         <MDBCardText>
           <h4>Students Application Management</h4>
@@ -429,8 +435,6 @@ const CoursesOnOffer = ({ programmes, entryMode, sessionOfEntry }) => {
         "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer.php"
       );
       setRows(coursesResponse.body || []);
-
-      console.log("THE DATA HERE: ", coursesResponse.body);
     } catch (err) {
       console.error("Error fetching data: ", err);
     }

@@ -28,13 +28,17 @@ import Box from "@mui/material/Box";
 import { Radio } from "@mui/material";
 import { CheckBox } from "@mui/icons-material";
 import { Checkbox } from "@material-ui/core";
+import StudentsAffairsTab from "./officers-tabs/students-affairs.js";
+import HODSTab from "./officers-tabs/hods.js";
 
 export default function OfficersTab() {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [init, setInit] = useState(false);
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(0);
   const [isReady, setIsReady] = useState(false);
+
+  const officerRole = localStorage.getItem("officeRole");
 
   const handleFetchData = async () => {
     if (isReady) {
@@ -60,7 +64,19 @@ export default function OfficersTab() {
 
   useEffect(() => {
     if (!init) {
-      handleFetchData();
+      // handleFetchData();
+
+      if (officerRole === "hod") {
+        setValue(0);
+      } else if (officerRole === "sao") {
+        setValue(1);
+      } else if (officerRole === "ao") {
+        setValue(2);
+      } else if (officerRole === "bursar") {
+        setValue(3);
+      } else if (officerRole === "registrar") {
+        setValue(4);
+      }
     }
   }, [init]);
 
@@ -109,7 +125,7 @@ export default function OfficersTab() {
 
       <Tabs
         value={value}
-        onChange={() => {}}
+        // onChange={(e, newValue) => setValue(newValue)}
         variant="scrollable"
         scrollButtons
         allowScrollButtonsMobile
@@ -123,147 +139,25 @@ export default function OfficersTab() {
       </Tabs>
       <Paper sx={{ width: "100%", overflow: "hidden" }}>
         <MDBRow style={{ padding: "10px" }}>
-          <Box
-            sx={{
-              flexGrow: 1,
-              bgcolor: "background.paper",
-              display: "flex",
-              // height: 224,
-            }}
-          >
-            <Tabs
-              orientation="vertical"
-              variant="scrollable"
-              value={value}
-              onChange={(e) => {
-                console.log("TAB VALUE: ", e);
-              }}
-              aria-label="Vertical tabs example"
-              sx={{ borderRight: 1, borderColor: "divider" }}
-            >
-              <Tab label="Clearance" />
-            </Tabs>
-            <TabPanel value={0} index={0}>
-              <div className="d-flex align-items-center">
-                <MDBInput
-                  label="Search"
-                  // value={resetEmail}
-                  type="text"
-                  onChange={(e) => {
-                    // setResetEmail(e.target.value);
-                  }}
-                  size="lg"
-                />
-
-                <MDBBtn
-                  className="w-25"
-                  size="lg"
-                  style={{ background: "#05321e" }}
-                  // onClick={resetUserPassword}
-                >
-                  Search
-                </MDBBtn>
-              </div>
-
-              <div
-                style={{ width: "100%", height: "500px", overflow: "scroll" }}
-              >
-                <table>
-                  {rows.map((std, index) => {
-                    let hasSubmittedRequirements = false;
-                    let hasSubmittedToHOD = false;
-                    if (std.SAOFulfiledRegistrationRequirements === "yes") {
-                      hasSubmittedRequirements = true;
-                    }
-
-                    if (std.SAOConfirmedSubmissionToHOD === "yes") {
-                      hasSubmittedToHOD = true;
-                    }
-
-                    return (
-                      <tr key={std.MatricNumber || index}>
-                        <td>
-                          <table>
-                            <thead>
-                              <tr>
-                                <th>FullName</th>
-                                <th>Mat Number</th>
-                                <th>Department</th>
-                                <th>Course</th>
-                              </tr>
-                            </thead>
-
-                            <tbody>
-                              <td>
-                                <strong>{std.Fullname}</strong>
-                              </td>
-                              <td>
-                                <strong>{std.MatricNumber}</strong>
-                              </td>
-
-                              <td>
-                                <strong>{std.Department}</strong>
-                              </td>
-                              <td>
-                                <strong>{std.Programme}</strong>
-                              </td>
-                            </tbody>
-                          </table>
-
-                          <div>
-                            <Checkbox
-                              onChange={(e) => {
-                                const newValue = e.target.checked;
-                                const updatedRows = [...rows];
-
-                                if (newValue) {
-                                  updatedRows[
-                                    index
-                                  ].SAOFulfiledRegistrationRequirements = "yes";
-                                }
-                                setRows(updatedRows);
-                              }}
-                              checked={hasSubmittedRequirements}
-                            />
-                            I confirm that the student has submitted all
-                            registration requirements.
-                          </div>
-                          <div>
-                            <Checkbox
-                              onChange={(e) => {
-                                const newValue = e.target.checked;
-                                console.log("");
-                                const updatedRows = [...rows];
-
-                                if (newValue) {
-                                  updatedRows[
-                                    index
-                                  ].SAOConfirmedSubmissionToHOD = "yes";
-                                }
-                                setRows(updatedRows);
-                              }}
-                              checked={hasSubmittedToHOD}
-                            />
-                            I confirm that i have submitted the student’s
-                            departmental file to his HOD.
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  <td></td>
-                </table>
-              </div>
-              <MDBBtn
-                className="w-50"
-                // size="lg"
-                style={{ background: "#05321e" }}
-                // onClick={resetUserPassword}
-              >
-                Submit
-              </MDBBtn>
-            </TabPanel>
-          </Box>
+          <MDBCol>
+            <Box>
+              <TabPanel value={value} index={0}>
+                <HODSTab />
+              </TabPanel>
+              <TabPanel value={value} index={1}>
+                <StudentsAffairsTab />
+              </TabPanel>
+              <TabPanel value={value} index={2}>
+                {/* <AccountOfficerTab /> */}
+              </TabPanel>
+              <TabPanel value={value} index={3}>
+                {/* <BursarTab /> */}
+              </TabPanel>
+              <TabPanel value={value} index={4}>
+                {/* <RegistrarTab /> */}
+              </TabPanel>
+            </Box>
+          </MDBCol>
         </MDBRow>
       </Paper>
     </div>

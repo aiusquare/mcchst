@@ -39,90 +39,36 @@ export const secondryScores = [
   { id: "10", name: "Awaiting Result" },
 ];
 
-export const programmes = [
-  {
-    id: "0",
-    name: "Higher National Diploma",
-    programs: [
-      {
-        id: 1,
-        name: "HND in Environmental Health Technology (HND-EHT)",
-      },
-      {
-        id: 2,
-        name: "HND in Health Information Management (HND-HIM)",
-      },
-      {
-        id: 3,
-        name: "HND in Dental Therapy (HND-DT)",
-      },
-    ],
-  },
-  {
-    id: "1",
-    name: "National Diploma",
-    programs: [
-      {
-        id: 1,
-        name: "ND in Public Health Technology (ND-PHT)",
-      },
-      {
-        id: 2,
-        name: "ND in Epidemiology and Disease Control Technology (ND-EDT)",
-      },
-      {
-        id: 3,
-        name: "ND in Environmental Health Technology (ND-EHT)",
-      },
-      {
-        id: 4,
-        name: "ND in Dental Therapy (ND-DT)",
-      },
-      {
-        id: 5,
-        name: "ND in Health Information Management (ND-HIM)",
-      },
-      {
-        id: 6,
-        name: "ND in Community Health (ND-CH)",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Professional Diploma",
-    programs: [
-      {
-        id: 2,
-        name: "Diploma in Medical Laboratory Technician (MLT)",
-      },
-      {
-        id: 3,
-        name: "Diploma in Pharmacy Technician (DPT)",
-      },
-      {
-        id: 4,
-        name: "Diploma in Community Health (CHEW)",
-      },
-    ],
-  },
-  {
-    id: "3",
-    name: "Certificates",
-    programs: [
-      {
-        id: 1,
-        name: "Certificate in Community Health (JCHEW)",
-      },
-    ],
-  },
-];
+export const accessRules = {
+  application: [
+    "/admin/application",
+    "/admin/list-of-applicants",
+    "/admin/list-of-registered",
+    "/admin/admission",
+  ],
+  finance: [
+    "/admin/finance",
+    "/admin/create-invoice",
+    "/admin/raised-invoices",
+  ],
+  officer: ["/admin/officers"],
+  users: ["/admin/users", "/admin/create-staff"],
+  siteAdmin: [
+    "/admin",
+    "/admin/application",
+    "/admin/finance",
+    "/admin/users",
+    "/admin/create-staff",
+    "/admin/settings",
+  ],
+};
 
 export const requiredRegistrationKeys = [
   "FirstName",
   "Surname",
   "PhoneNumber",
   "Email",
+  "AdmissionNumber",
   "Address",
   "State",
   "LGA",
@@ -136,6 +82,93 @@ export const requiredRegistrationKeys = [
   "ParentOrGuardianName",
   "ParentOrGuardianPhone",
   "ParentOrGuardianAddress",
+];
+
+export const programmes = [
+  {
+    id: "0",
+    name: "Higher National Diploma",
+    programs: [
+      {
+        id: 1,
+        name: "HND in Environmental Health Technology",
+      },
+      {
+        id: 2,
+        name: "HND in Health Information Management",
+      },
+      {
+        id: 3,
+        name: "HND in Dental Therapy",
+      },
+    ],
+  },
+  {
+    id: "1",
+    name: "National Diploma",
+    programs: [
+      {
+        id: 1,
+        name: "ND in Public Health Technology",
+      },
+      {
+        id: 2,
+        name: "ND in Epidemiology and Disease Control Technology",
+      },
+      {
+        id: 3,
+        name: "ND in Environmental Health Technology",
+      },
+      {
+        id: 4,
+        name: "ND in Dental Therapy",
+      },
+      {
+        id: 4,
+        name: "ND in Dental Technology",
+      },
+      {
+        id: 5,
+        name: "ND in Health Information Management",
+      },
+      {
+        id: 6,
+        name: "ND in Community Health",
+      },
+      {
+        id: 4,
+        name: "ND in Medical Laboratory Science",
+      },
+    ],
+  },
+  {
+    id: "2",
+    name: "Professional Diploma",
+    programs: [
+      {
+        id: 2,
+        name: "Diploma in Medical Laboratory Technician",
+      },
+      {
+        id: 3,
+        name: "Diploma in Pharmacy Technician",
+      },
+      {
+        id: 4,
+        name: "Diploma in Community Health",
+      },
+    ],
+  },
+  {
+    id: "3",
+    name: "Certificates",
+    programs: [
+      {
+        id: 1,
+        name: "Certificate in Community Health",
+      },
+    ],
+  },
 ];
 
 export const admissionProgrammes = [
@@ -162,6 +195,11 @@ export const admissionProgrammes = [
   {
     department: "Medical Laboratory Science",
     programmes: [
+      {
+        programme: "ND in Medical Laboratory Technology",
+        programmeCode: "ND MLT",
+        duration: "2 Years",
+      },
       {
         programme: "Diploma in Medical Laboratory Technician",
         programmeCode: "MLT",
@@ -207,6 +245,11 @@ export const admissionProgrammes = [
   {
     department: "Dental Health",
     programmes: [
+      {
+        programme: "ND in Dental Technology",
+        programmeCode: "ND DTE",
+        duration: "2 Years",
+      },
       {
         programme: "ND in Dental Therapy",
         programmeCode: "ND DT",

@@ -16,7 +16,7 @@ import Swal from "sweetalert2";
 import request from "superagent";
 import MenuItem from "@mui/material/MenuItem";
 import SelectionBox from "../SelectionBox";
-import { accesses, officers } from "../Arrays";
+import { accesses, admissionProgrammes, officers } from "../Arrays";
 
 export default function AdminLoginComponent() {
   const staffStatuses = [
@@ -35,11 +35,10 @@ export default function AdminLoginComponent() {
   const [access, setAccess] = useState("");
   const [accessMode, setAccessMode] = useState("readOnly");
   const [userStatus, setUserStatus] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [hasAdminAccess, setHasAdminAccess] = useState(false);
   const [isOfficer, setIsOfficer] = useState(false);
   const [office, setOffice] = useState("");
+  const [department, setDepartment] = useState("");
 
   const handleUserCreation = async () => {
     const data = {
@@ -51,7 +50,7 @@ export default function AdminLoginComponent() {
       access: access,
       mode: accessMode,
       office: office,
-      password: password,
+      department: department,
     };
 
     if (validateForm()) {
@@ -130,14 +129,6 @@ export default function AdminLoginComponent() {
 
       return false;
     }
-    if (password === "") {
-      Toast.fire({
-        icon: "error",
-        title: "Password must be provided",
-      });
-
-      return false;
-    }
 
     // Regular expression for validating a Nigerian phone number
     const phoneNumberRegex = /^(\+234|0)([7-9]{1})([0-9]{9})$/;
@@ -163,16 +154,6 @@ export default function AdminLoginComponent() {
         icon: "error",
         title: `Invalid email please check and try again.`,
       });
-      return false;
-    }
-
-    if (password !== confirmPassword) {
-      Toast.fire({
-        icon: "error",
-        title:
-          "Password and Confirm password mismatch, please check and provide correct one",
-      });
-
       return false;
     }
 
@@ -220,15 +201,22 @@ export default function AdminLoginComponent() {
                   return <MenuItem value={status.name}>{status.name}</MenuItem>;
                 })}
               />
-              <TextInput
-                tValue={setPassword}
-                tType="password"
-                tLabel="password"
-              />
-              <TextInput
-                tValue={setConfirmPassword}
-                tType="password"
-                tLabel="confirm password"
+
+              <SelectionBox
+                label="Department"
+                className="center-cmp"
+                value={department}
+                changed={(e) => {
+                  console.log("DEPARTMENT: ", e);
+                  setDepartment(e);
+                }}
+                content={admissionProgrammes.map((department) => {
+                  return (
+                    <MenuItem value={department.department}>
+                      {department.department}
+                    </MenuItem>
+                  );
+                })}
               />
 
               <FormControlLabel
@@ -265,13 +253,30 @@ export default function AdminLoginComponent() {
                         setIsOfficer(true);
                       } else {
                         setIsOfficer(false);
+                        setOffice("");
                       }
+
+                      console.log("Office access: ", office);
                     }}
                     content={accesses.map((access) => {
                       return (
                         <MenuItem value={access.code}>{access.name}</MenuItem>
                       );
                     })}
+                  />
+
+                  <FormControlLabel
+                    control={<input className="reg-radio" type="checkbox" />}
+                    label="Officer access"
+                    checked={isOfficer}
+                    onChange={() => {
+                      if (isOfficer) {
+                        setIsOfficer(false);
+                        setOffice("");
+                      } else {
+                        setIsOfficer(true);
+                      }
+                    }}
                   />
 
                   {isOfficer && (

@@ -2,16 +2,26 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import "./style.css";
 
-const Countdown = ({ targetDate, handleExpire }) => {
-  const [timeRemaining, setTimeRemaining] = useState(calculateTimeRemaining());
+const Countdown = ({ targetDate, handleExpire = () => {} }) => {
+  const [timeRemaining, setTimeRemaining] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
   function calculateTimeRemaining() {
     const now = moment();
     const target = moment(targetDate);
     const duration = moment.duration(target.diff(now));
 
+    // Return zero if time has expired
+    if (duration.asMilliseconds() <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
     return {
-      days: duration.days(),
+      days: Math.floor(duration.asDays()),
       hours: duration.hours(),
       minutes: duration.minutes(),
       seconds: duration.seconds(),
@@ -19,23 +29,36 @@ const Countdown = ({ targetDate, handleExpire }) => {
   }
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const remainingTime = calculateTimeRemaining();
-      setTimeRemaining(remainingTime);
+    // Initial calculation
+    const initialTime = calculateTimeRemaining();
+    setTimeRemaining(initialTime);
 
-      if (
-        remainingTime.days <= 0 &&
-        remainingTime.hours <= 0 &&
-        remainingTime.minutes <= 0 &&
-        remainingTime.seconds <= 0
-      ) {
-        // Notify the calling component when time is expired
-        handleExpire(true);
-        clearInterval(interval);
-      }
-    }, 1000);
+    // Only start timer if time hasn't expired
+    if (
+      initialTime.days > 0 ||
+      initialTime.hours > 0 ||
+      initialTime.minutes > 0 ||
+      initialTime.seconds > 0
+    ) {
+      const interval = setInterval(() => {
+        const remainingTime = calculateTimeRemaining();
+        setTimeRemaining(remainingTime);
 
-    return () => clearInterval(interval);
+        if (
+          remainingTime.days <= 0 &&
+          remainingTime.hours <= 0 &&
+          remainingTime.minutes <= 0 &&
+          remainingTime.seconds <= 0
+        ) {
+          handleExpire(true);
+          clearInterval(interval);
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    } else {
+      handleExpire(true);
+    }
   }, [handleExpire, targetDate]);
 
   return (

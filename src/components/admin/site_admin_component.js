@@ -19,16 +19,23 @@ export default function SiteAdminTab() {
   const [stdId, setStdId] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [resetEmail, setResetEmail] = useState("");
+  const [pictureRstEmail, setPictureRstEmail] = useState("");
 
   const resetUserPassword = async () => {
-    console.log("COURSES ON OFFER", resetEmail);
-
     if (navigator.onLine) {
       // progress spinner
       loader({
         title: "Resetting",
         text: "Please! wait.",
       });
+
+      if (resetEmail === "") {
+        Toast.fire({
+          icon: "error",
+          title: "Please! enter email",
+        });
+        return;
+      }
 
       const data = { Email: resetEmail };
 
@@ -43,6 +50,56 @@ export default function SiteAdminTab() {
           });
 
           setResetEmail("");
+        })
+        .catch((err) => {
+          let errorText = err.response.text;
+          console.log(errorText);
+
+          Swal.fire({
+            title: "Error!",
+            text: errorText,
+            icon: "error",
+          });
+        });
+    } else {
+      Toast.fire({
+        icon: "error",
+        title: "No internet connection",
+      });
+    }
+  };
+
+  const resetStdPicture = async () => {
+    if (navigator.onLine) {
+      if (pictureRstEmail === "") {
+        Toast.fire({
+          icon: "error",
+          title: "Please! enter email",
+        });
+        return;
+      }
+
+      // progress spinner
+      loader({
+        title: "Resetting",
+        text: "Please! wait...",
+      });
+
+      const data = { Email: pictureRstEmail };
+
+      await request
+        .post("https://api.mcchstfuntua.edu.ng/uploads/reset_image.php")
+        .type("application/json")
+        .send(data)
+        .then((response) => {
+          console.log("RESPONSE", response.body);
+
+          Toast.fire({
+            icon: "success",
+            title: "Resetted successfully",
+          });
+
+          setPictureRstEmail("");
         })
         .catch((err) => {
           let errorText = err.response.text;
@@ -135,7 +192,38 @@ export default function SiteAdminTab() {
                 style={{ background: "#05321e" }}
                 onClick={resetUserPassword}
               >
-                Reset
+                Reset Password
+              </MDBBtn>
+            </div>
+          </MDBCol>
+        </MDBRow>
+      </Paper>
+
+      <Paper className="p-2 my-2 w-100">
+        <div style={{ fontWeight: "900", padding: "20px" }}>
+          Reset Student picture
+        </div>
+
+        <MDBRow>
+          <MDBCol>
+            <div className="d-flex align-items-center">
+              <MDBInput
+                label="Picture Reset email"
+                value={pictureRstEmail}
+                type="text"
+                onChange={(e) => {
+                  setPictureRstEmail(e.target.value);
+                }}
+                size="lg"
+              />
+
+              <MDBBtn
+                className="w-25"
+                size="lg"
+                style={{ background: "#05321e" }}
+                onClick={resetStdPicture}
+              >
+                Reset Picture
               </MDBBtn>
             </div>
           </MDBCol>

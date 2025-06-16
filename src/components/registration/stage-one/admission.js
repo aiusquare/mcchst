@@ -125,24 +125,27 @@ const NotificationOfAdmission = () => {
     loader({ title: "Downloading", text: "please wait..." });
 
     try {
-      const response = await fetch("/notif_of_admission.pdf");
-      const existingPdfBytes = await response.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
+      const response = await fetch(
+        "https://api.mcchstfuntua.edu.ng/resources/download/notif_of_admin.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ application_id: appNumber }),
+        }
+      );
 
-      form.getTextField("date").setText(date);
-      form.getTextField("fullname").setText(fullname);
-      form.getTextField("applicationNumber").setText(appNumber);
-      form.getTextField("dearName").setText(applicantName);
-      form.getTextField("department").setText(department);
-      form.getTextField("programmeOffered").setText(programme);
-      form.getTextField("modeOfEntry").setText(modeOfEntry);
-      form.getTextField("level").setText(level);
-      form.getTextField("commencementOfLectures").setText(lectureDate);
+      if (!response.ok) throw new Error("PDF generation failed");
 
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      saveAs(blob, "notification_of_admission.pdf");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "notification_of_admission.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
       Swal.fire({
         title: "success",
@@ -150,7 +153,9 @@ const NotificationOfAdmission = () => {
         icon: "success",
       });
     } catch (error) {
-      console.error("Error processing PDF:", error);
+      console.error("Download error:", error);
+
+      // console.error("Error processing PDF:", error);
       Swal.fire({
         title: "Error!",
         text: error,
@@ -158,6 +163,52 @@ const NotificationOfAdmission = () => {
       });
     }
   };
+
+  // const handlePrintNotifOfAdmission = async () => {
+  //   if (!isReady) {
+  //     Toast.fire({
+  //       icon: "warning",
+  //       title:
+  //         "kindly wait for the data to load. Try again in a minute or check your internet connection",
+  //     });
+  //     return;
+  //   }
+  //   loader({ title: "Downloading", text: "please wait..." });
+
+  //   try {
+  //     const response = await fetch("/notif_of_admission.pdf");
+  //     const existingPdfBytes = await response.arrayBuffer();
+  //     const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  //     const form = pdfDoc.getForm();
+
+  //     form.getTextField("date").setText(date);
+  //     form.getTextField("fullname").setText(fullname);
+  //     form.getTextField("applicationNumber").setText(appNumber);
+  //     form.getTextField("dearName").setText(applicantName);
+  //     form.getTextField("department").setText(department);
+  //     form.getTextField("programmeOffered").setText(programme);
+  //     form.getTextField("modeOfEntry").setText(modeOfEntry);
+  //     form.getTextField("level").setText(level);
+  //     form.getTextField("commencementOfLectures").setText(lectureDate);
+
+  //     const pdfBytes = await pdfDoc.save();
+  //     const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  //     saveAs(blob, "notification_of_admission.pdf");
+
+  //     Swal.fire({
+  //       title: "success",
+  //       text: "downloaded successfully",
+  //       icon: "success",
+  //     });
+  //   } catch (error) {
+  //     console.error("Error processing PDF:", error);
+  //     Swal.fire({
+  //       title: "Error!",
+  //       text: error,
+  //       icon: "error",
+  //     });
+  //   }
+  // };
 
   const handleFetchData = async () => {
     const data = {
@@ -215,12 +266,9 @@ const NotificationOfAdmission = () => {
         <b>Notification of Admission</b>
       </h1>
       <div className="text-container" style={{ textAlign: "center" }}>
-        <br />
-        Please click <b>Download</b> button below to download and print your
-        Notification of Admission after which you can click <b>Paynow</b> button
-        to pay for acceptance fee of <b>N4000.00</b> to enable you print your
-        letter of Admission upon which you will be enabled to proceed with
-        registration.
+        Please click the <b>Download</b> button below to download and print your
+        Notification of Admission. After printing, you are required to report to
+        the school for departmental screening by your Head of Department (HOD).
         <div className="button-container">
           <MDBRow>
             <MDBCol>
@@ -232,7 +280,7 @@ const NotificationOfAdmission = () => {
                 label="Download"
               />
             </MDBCol>
-            <MDBCol>
+            {/* <MDBCol>
               <Button
                 handleClick={() => {
                   navigate("/acceptance", {
@@ -242,7 +290,7 @@ const NotificationOfAdmission = () => {
                 className="button-instance"
                 label="Pay now"
               />
-            </MDBCol>
+            </MDBCol> */}
           </MDBRow>
         </div>
       </div>

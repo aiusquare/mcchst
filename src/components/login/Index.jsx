@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "../button/";
 import { TextField } from "../text-field/components/TextField";
 import logo from "../../pictures/logo.png";
@@ -119,6 +119,8 @@ export const LoginComponent = () => {
             // setting login session
             localStorage.setItem("lastActivityTime", Date.now().toString());
 
+            console.log("Response body:", response.body);
+
             const varificationStatus = response.body.eVarified;
             const paymentStatus = response.body.Paid;
             const userEmail = response.body.Email;
@@ -126,6 +128,7 @@ export const LoginComponent = () => {
             const isAdmitted = response.body.admitted;
             const hasPaidAcceptance = response.body.HasPaidAcceptance; // acceptance fee payment check
             const isValidated = response.body.IsValidated; // checking for whether user has varified his data
+            const hasApprovedByHOD = response.body.HasApprovedByHOD;
 
             setVarificationCode(response.body.vPin);
             setEmail(userEmail);
@@ -146,9 +149,15 @@ export const LoginComponent = () => {
                   //   });
                   // }
                 } else {
-                  navigate("/reg-1", {
-                    state: { userData: response.body },
-                  });
+                  if (hasApprovedByHOD === "yes") {
+                    navigate("/acceptance", {
+                      state: { userData: response.body },
+                    });
+                  } else {
+                    navigate("/reg-1", {
+                      state: { userData: response.body },
+                    });
+                  }
                 }
               } else if (isAdmitted === "no") {
                 navigate("/login");
@@ -173,11 +182,21 @@ export const LoginComponent = () => {
             // }
           })
           .catch((err) => {
-            Swal.fire({
-              title: "Error!",
-              text: err,
-              icon: "error",
-            });
+            let errorMessage = err.toString();
+
+            if (errorMessage.includes("Request has been terminated")) {
+              Swal.fire({
+                title: "Network Issue!",
+                text: "You have a very poor network. Please try again later.",
+                icon: "warning",
+              });
+            } else {
+              Swal.fire({
+                title: "Error!",
+                text: errorMessage,
+                icon: "error",
+              });
+            }
           });
       } else {
         Toast.fire({

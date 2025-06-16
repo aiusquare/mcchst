@@ -48,10 +48,6 @@ const StudentProfile = () => {
     }
   }, []);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   useEffect(() => {
     // Set the viewport width to 1024 when the component mounts
     const metaTag = document.querySelector('meta[name="viewport"]');
@@ -108,11 +104,6 @@ const StudentProfile = () => {
             >
               Student Data
             </h2>
-
-            {/* <div style={{ fontWeight: 800, color: "red" }}>Note:</div>
-            <p style={{ fontWeight: 800, fontSize: "12px" }}>
-              {noteToApplicant}
-            </p> */}
 
             <div style={{ position: "relative", width: "100%" }}>
               <div style={{ right: "5px", float: "right" }}>

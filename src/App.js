@@ -40,6 +40,12 @@ import AdmittedStdTab from "./components/admin/pages/list-of-admitted-std";
 import RegistrationDownloadsCard from "./components/student-portal/registration-downlods";
 import AcademicCalender from "./components/student-portal/academic-calender";
 import RegisteredStdTab from "./components/admin/pages/list-of-registered";
+import CreateInvoice from "./components/admin/pages/finances/create-invoice";
+import InvoicePage from "./components/student-portal/invoices/invoice";
+import InvoiceList from "./components/student-portal/invoices/invoices";
+import AdminPasswordCreationForm from "./components/create-password";
+import StudentPaymentsDashboard from "./components/student-portal/payments/manage-payments";
+import ListOfAdminInvoices from "./components/admin/pages/list-of-invoices";
 
 function App() {
   return (
@@ -160,6 +166,14 @@ function App() {
             }
           />
           <Route
+            path="create-password"
+            element={
+              <ProtectedUrlRoute>
+                <AdminPasswordCreationForm />
+              </ProtectedUrlRoute>
+            }
+          />
+          <Route
             path="list-of-applicants"
             element={
               <ProtectedUrlRoute>
@@ -200,6 +214,25 @@ function App() {
               </ProtectedUrlRoute>
             }
           />
+
+          <Route
+            path="create-invoice"
+            element={
+              <ProtectedUrlRoute>
+                <CreateInvoice />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="raised-invoices"
+            element={
+              <ProtectedUrlRoute>
+                <ListOfAdminInvoices />
+              </ProtectedUrlRoute>
+            }
+          />
+
           <Route
             path="users"
             element={
@@ -247,46 +280,12 @@ function App() {
           <Route path="" element={<StudentPortal />} />
           <Route path="reg-downloads" element={<RegistrationDownloadsCard />} />
           <Route path="acc-calender" element={<AcademicCalender />} />
-          {/* <Route
-            path="admission"
-            element={
-              <ProtectedUrlRoute>
-                <AdmissionTab />
-              </ProtectedUrlRoute>
-            }
-          />
+          <Route path="invoice" element={<InvoicePage />} />
+          <Route path="invoices" element={<InvoiceList />} />
           <Route
-            path="finance"
-            element={
-              <ProtectedUrlRoute>
-                <FinancialTab />
-              </ProtectedUrlRoute>
-            }
+            path="manage-payments"
+            element={<StudentPaymentsDashboard />}
           />
-          <Route
-            path="users"
-            element={
-              <ProtectedUrlRoute>
-                <UsersTab />
-              </ProtectedUrlRoute>
-            }
-          />
-          <Route
-            path="create-staff"
-            element={
-              <ProtectedUrlRoute>
-                <CreateUserTab />
-              </ProtectedUrlRoute>
-            }
-          />
-          <Route
-            path="settings"
-            element={
-              <ProtectedUrlRoute>
-                <SiteAdminTab />
-              </ProtectedUrlRoute>
-            }
-          /> */}
         </Route>
         <Route path="contact" element={<ContactUs />} />
         <Route path="about" element={<AboutUs />} />

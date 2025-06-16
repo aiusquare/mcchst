@@ -51,6 +51,17 @@ export default function AdminLoginComponent() {
                   title: "Logged successfully",
                 });
 
+                console.log(response.body);
+
+                if (response.body.password === "") {
+                  localStorage.setItem("password_setup", "no");
+                  navigate("/admin/create-password", {
+                    state: { data: response.body },
+                  });
+                } else {
+                  localStorage.setItem("password_setup", "yes");
+                }
+
                 // setting login session
                 localStorage.setItem("adminLogin", Date.now().toString());
 
@@ -63,14 +74,16 @@ export default function AdminLoginComponent() {
                 } else if (responseData.access === "application") {
                   navigate("/admin/application");
                 } else if (responseData.access === "officer") {
-                  localStorage.setItem("office", responseData.office_role);
                   navigate("/admin/officers");
                 } else {
                   navigate("/admin", { state: { data: responseData } });
                 }
 
+                localStorage.setItem("userId", responseData.user_id);
                 localStorage.setItem("access", responseData.access);
                 localStorage.setItem("mode", responseData.mode);
+                localStorage.setItem("officeRole", responseData.office_role);
+                localStorage.setItem("department", responseData.department);
               })
               .catch((err) => {
                 let errorMsg = "";

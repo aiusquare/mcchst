@@ -108,6 +108,7 @@ function Registration(props) {
       SecondChoiceProgramme: course2,
       ApplicationId: applicantId,
       ModeOfEntry: modeOfEntry,
+      SessionOfEntry: entrySession,
 
       PrimarySchool: primary,
       SecondarySchool: secondary,
@@ -254,7 +255,7 @@ function Registration(props) {
           }
         }}
         onDeleteComplete={(item) => {
-          console.log("AFTER DELETE", item);
+          // console.log("AFTER DELETE", item);
         }}
       >
         <td>{secSubject}</td>
@@ -288,7 +289,7 @@ function Registration(props) {
             setOtherName(userData.OtherName);
             setEmail(userData.Email);
             setPhoneNumber(userData.PhoneNumber);
-            setApplicantId(userData.ApplicationId);
+            setApplicantId(userData?.ApplicationId);
           }
 
           try {
@@ -298,7 +299,7 @@ function Registration(props) {
 
             const retProgrammes = response.data;
 
-            console.log("THE RET DATA", retProgrammes);
+            // console.log("THE RET DATA", retProgrammes);
 
             setProgrammes(retProgrammes);
             setCourses(programmes[0].programs);
@@ -314,7 +315,7 @@ function Registration(props) {
           navigate("/login");
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        // console.error("Error fetching data:", error);
       }
     };
 
@@ -348,14 +349,18 @@ function Registration(props) {
     setSecondryScore("default");
   }, [secScores]);
 
+  const currentYear = new Date().getFullYear();
   let allYears = [];
+
   for (let x = 0; x <= 50; x++) {
-    allYears.push(2024 - x);
+    allYears.push(currentYear - x);
   }
 
-  const yearsList = allYears.map((year) => {
-    return <MenuItem value={year}>{year}</MenuItem>;
-  });
+  const yearsList = allYears.map((year) => (
+    <MenuItem key={year} value={year}>
+      {year}
+    </MenuItem>
+  ));
 
   return (
     <div>
@@ -380,7 +385,7 @@ function Registration(props) {
                     color: "#05321e",
                   }}
                 >
-                  <h1>Application Form 2024</h1>
+                  <h1>Application Form 2025</h1>
                 </div>
               </div>
               <div className="reg-captions">Basic Info</div>
@@ -535,7 +540,7 @@ function Registration(props) {
             className="d-flex flex-column align-items-center justify-content-center"
           >
             <Card sx={{ maxWidth: 500 }} className="p-2 w-100">
-              <div className="reg-captions">Course Details</div>
+              {/* <div className="reg-captions">Course Details</div> */}
 
               <FormGroup>
                 <div
@@ -564,7 +569,7 @@ function Registration(props) {
                 </div>
               </FormGroup>
 
-              {!hasJamb && (
+              {hasJamb && (
                 <div>
                   <TextField
                     style={{ width: "90%" }}

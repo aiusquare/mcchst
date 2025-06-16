@@ -33,8 +33,7 @@ export default function CarouselComp() {
             <div className="h-100" style={{ cursor: "pointer" }}>
               <CarouselItem
                 title="Exciting News!"
-                description=" Our admission portal opens on March 1st, 2024. Get ready to join
-                our vibrant community!"
+                description="We are thrilled to announce that our admission portal will officially open on March 1st, 2025! Get ready to join our vibrant community"
               />
             </div>
           </div>

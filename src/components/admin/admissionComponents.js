@@ -1,4 +1,3 @@
-import * as React from "react";
 import Paper from "@mui/material/Paper";
 import "../admin/css/style.css";
 import {
@@ -20,7 +19,6 @@ import { MuiFileInput } from "mui-file-input";
 import CloseIcon from "@mui/icons-material/Close";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import {
-  Box,
   Checkbox,
   FormControl,
   InputLabel,
@@ -30,17 +28,24 @@ import {
 } from "@mui/material";
 
 import { admissionProgrammes } from "../Arrays";
+import useResizeObserver from "../hooks/useResizeObserver";
+import { baseUrl } from "../../services/setup";
 
 export default function AdmissionTab() {
+  const [containerRef, size] = useResizeObserver();
   const [admissionSms, setAdmissionSms] = useState("");
   const [admissionEmail, setAdmissionEmail] = useState("");
   const [listOfAdmittedStudents, setListOfAdmittedStudents] = useState([]);
   const [file, setFile] = useState(null);
+  const [jambCsv, setJambCsv] = useState(null);
   const [courseRegfile, setCourseRegFile] = useState(null);
-  const [rows, setRows] = useState([]);
 
   const handleFileChange = (e) => {
     setFile(e);
+  };
+
+  const handleJambFileChange = (e) => {
+    setJambCsv(e);
   };
 
   const handleCourseRegFileChange = (e) => {
@@ -90,6 +95,45 @@ export default function AdmissionTab() {
       text: "This feature if temporarily not available.",
       icon: "info",
     });
+  };
+
+  const handleJambAdmissionUpload = async (e) => {
+    if (!jambCsv) {
+      Swal.fire({
+        title: "Error!",
+        text: "No file selected",
+        icon: "error",
+      });
+      return;
+    }
+
+    loader({
+      title: "Uploading",
+      text: "Please wait...",
+    });
+
+    const formData = new FormData();
+    formData.append("csv", jambCsv); // Ensure the name 'csv' matches your PHP script
+
+    try {
+      await request
+        .post(baseUrl + "/admission/jamb_upload")
+        .send(formData)
+        .set("Accept", "application/json");
+
+      Toast.fire({
+        icon: "success",
+        title: "Uploaded successfully",
+      });
+      setJambCsv(null);
+    } catch (err) {
+      // console.error("Error uploading file", err);
+      Swal.fire({
+        title: "Error!",
+        text: "There was an error uploading the file.",
+        icon: "error",
+      });
+    }
   };
 
   const handleCourseRegUpload = async (e) => {
@@ -245,7 +289,10 @@ export default function AdmissionTab() {
   };
 
   return (
-    <div className="m-4 d-flex flex-column align-items-center">
+    <div
+      ref={containerRef}
+      className="m-4 d-flex flex-column align-items-center"
+    >
       <MDBCardBody>
         <MDBCardText>
           <h4>Admission Management</h4>
@@ -298,6 +345,43 @@ export default function AdmissionTab() {
               >
                 backup admission data
               </div>
+            </div>
+          </MDBCol>
+        </MDBRow>
+      </Paper>
+
+      <Paper className="mt-2" sx={{ width: "100%", overflow: "hidden" }}>
+        <MDBRow style={{ padding: "10px" }}>
+          <div style={{ fontWeight: "900", padding: "20px" }}>
+            Jamb Admission Upload
+          </div>
+          <MDBCol style={{ display: "flex", justifyContent: "center" }}>
+            <div>
+              <MuiFileInput
+                InputProps={{
+                  inputProps: {
+                    accept: ".csv",
+                  },
+                  startAdornment: <AttachFileIcon />,
+                }}
+                value={jambCsv}
+                placeholder="choose the file here..."
+                onChange={(e) => {
+                  handleJambFileChange(e);
+                }}
+                clearIconButtonProps={{
+                  title: "Remove",
+                  children: <CloseIcon fontSize="small" />,
+                }}
+              />
+
+              <MDBBtn
+                onClick={handleJambAdmissionUpload}
+                style={{ background: "#05321e", height: "56px" }}
+                className="p-3"
+              >
+                Upload
+              </MDBBtn>
             </div>
           </MDBCol>
         </MDBRow>
@@ -765,13 +849,14 @@ const StudentsAdmission = () => {
     }
 
     await request
-      .post("https://api.mcchstfuntua.edu.ng/admin/admission/admit/index.php")
+      .post(baseUrl + "admission/admit_students")
       .type("application/json")
       .send(listOfAdmitted)
       .then((response) => {
+        console.log("THE RESPONSE", response);
         Toast.fire({
           icon: "success",
-          title: "Registered successfully",
+          title: "Admitted successfully",
         });
 
         window.location.reload();

@@ -25,25 +25,16 @@ const SideNavBar = () => {
   const navigate = useNavigate();
 
   const handleAccess = (loc) => {
-    const access = localStorage.getItem("access");
-
-    if (access === "fullAccess" || access === "siteAdmin") {
-      toggleSidebar();
-      navigate(loc);
-    } else {
-      Toast.fire({
-        icon: "error",
-        title: "You have restrictive access",
-      });
-    }
+    toggleSidebar();
+    navigate(loc);
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex" }}>
+    <div style={{ display: "flex" }}>
       <Sidebar
         breakPoint="sm"
         transitionDuration={800}
-        style={{ height: "100vh", background: "#feffff" }}
+        style={{ background: "#feffff" }}
       >
         <Menu>
           <div style={{ display: "flex" }}>
@@ -67,6 +58,7 @@ const SideNavBar = () => {
           <SubMenu
             icon={<BarIcons img={applicationIcon} />}
             label="Application"
+            style={{ textAlign: "left" }}
           >
             <MenuItem
               style={{ textAlign: "left" }}
@@ -86,7 +78,11 @@ const SideNavBar = () => {
             </MenuItem>
           </SubMenu>
 
-          <SubMenu icon={<BarIcons img={admissionIcon} />} label="Admission">
+          <SubMenu
+            icon={<BarIcons img={admissionIcon} />}
+            label="Admission"
+            style={{ textAlign: "left" }}
+          >
             <MenuItem
               style={{ textAlign: "left" }}
               onClick={() => {
@@ -114,23 +110,39 @@ const SideNavBar = () => {
             </MenuItem>
           </SubMenu>
 
-          {/* <MenuItem
+          <SubMenu
+            label="Finance"
             style={{ textAlign: "left" }}
-            onClick={() => {
-              handleAccess("admission");
-            }}
-          >
-            Admission
-          </MenuItem> */}
-          <MenuItem
-            style={{ textAlign: "left" }}
-            onClick={() => {
-              handleAccess("finance");
-            }}
             icon={<BarIcons img={financeIcon} />}
           >
-            Finances
-          </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("finance");
+              }}
+              // icon={<BarIcons img={financeIcon} />}
+            >
+              Manage Payment
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("create-invoice");
+              }}
+            >
+              Create Invoice
+            </MenuItem>
+
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("raised-invoices");
+              }}
+            >
+              List of Invoices Raised
+            </MenuItem>
+          </SubMenu>
+
           <MenuItem
             style={{ textAlign: "left" }}
             onClick={() => {

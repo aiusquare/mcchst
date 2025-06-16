@@ -45,6 +45,16 @@ export const MobileMenu = () => {
             </div>
 
             <div
+              // onClick={() => {
+              //   navigate("about");
+              //   setShowMenu(false);
+              // }}
+              className="menu-bg"
+            >
+              E-Library
+            </div>
+
+            <div
               onClick={() => {
                 navigate("about");
                 setShowMenu(false);

@@ -13,7 +13,13 @@ import logo from "../../pictures/logo.png";
 import financeIcon from "../../pictures/finance.png";
 import { Toast } from "../errorNotifier";
 
-import { Sidebar, Menu, MenuItem, useProSidebar } from "react-pro-sidebar";
+import {
+  Sidebar,
+  Menu,
+  MenuItem,
+  useProSidebar,
+  SubMenu,
+} from "react-pro-sidebar";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Chip, Divider } from "@mui/material";
@@ -80,15 +86,31 @@ const SideNavBar = () => {
           >
             Time table
           </MenuItem>
-          <MenuItem
-            style={{ textAlign: "left" }}
-            onClick={() => {
-              // handleAccess("finance");
-            }}
+
+          <SubMenu
             icon={<BarIcons img={financeIcon} />}
+            label="Payments"
+            style={{ textAlign: "left" }}
           >
-            Payments
-          </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("manage-payments");
+              }}
+              icon={<BarIcons img={financeIcon} />}
+            >
+              Manage Payments
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("invoices");
+              }}
+              icon={<BarIcons img={financeIcon} />}
+            >
+              Billing
+            </MenuItem>
+          </SubMenu>
 
           <MenuItem
             style={{ textAlign: "left" }}

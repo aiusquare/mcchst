@@ -6,7 +6,6 @@ import {
   MDBCard,
   MDBCardText,
   MDBCardBody,
-  MDBCardImage,
   MDBBtn,
   MDBBreadcrumb,
   MDBBreadcrumbItem,
@@ -15,13 +14,69 @@ import {
 
 import "./css/style.css";
 import request from "superagent";
-import { useNavigate } from "react-router-dom";
+import PassportUploader from "./picture-uploder";
+import { Toast } from "../errorNotifier";
+import { loader } from "../LoadingSpinner";
+import Countdown from "../count-down/countdown";
 
 export default function StudentProfile(props) {
-  const navigate = useNavigate();
   const userData = props.userData;
   const [init, setInit] = useState(false);
   const [basicDetails, setBasicDetails] = useState([]);
+  const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [isPictureUploaded, setIsPictureUploaded] = useState(true);
+
+  const uploadImageToServer = async () => {
+    if (!image) {
+      alert("No file selected.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("application_id", userData.ApplicationId);
+    formData.append("email", userData.Email);
+    formData.append("phone", userData.PhoneNumber);
+    formData.append("name", userData.FirstName);
+
+    try {
+      loader({
+        title: "Uploading your passport",
+        text: "Please! wait while we upload your passport.",
+      });
+
+      const response = await fetch(
+        "https://api.mcchstfuntua.edu.ng/uploads/passport.php",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsPictureUploaded(true);
+        Toast.fire({
+          icon: "success",
+          title: "Image uploaded successfully!",
+        });
+      } else {
+        Toast.fire({
+          icon: "error",
+          title: "Upload failed: " + result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+
+      Toast.fire({
+        icon: "error",
+        title: "An error occurred during upload.",
+      });
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,14 +86,22 @@ export default function StudentProfile(props) {
         };
 
         const response = await request
-          .post("https://api.mcchstfuntua.edu.ng/admin/get_admitted_std.php")
+          .post("https://api.mcchstfuntua.edu.ng/dashboard/get_data.php")
           .type("application/json")
           .send(data);
 
         if (response.body) {
           const basicDetails = response.body;
 
-          console.log("BASIC DETAIL", basicDetails);
+          if (basicDetails.PassportName) {
+            setIsPictureUploaded(true);
+            setImageUrl(
+              "https://api.mcchstfuntua.edu.ng/uploads/passports/" +
+                basicDetails.PassportName
+            );
+          } else {
+            setIsPictureUploaded(false);
+          }
 
           setBasicDetails(basicDetails);
           setInit(true);
@@ -59,7 +122,19 @@ export default function StudentProfile(props) {
   }, [userData, init]);
 
   return (
-    <section>
+    <div>
+      <div
+        className="bg-image p-2"
+        style={{ backgroundColor: "#05321e", color: "white" }}
+      >
+        <h3>You are expected to complete onboarding before the countdown</h3>
+      </div>
+      <div className="mb-4">
+        <Countdown
+          targetDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
+          handleExpire={(expired) => console.log("Expired:", expired)}
+        />
+      </div>
       <MDBContainer className="py-5">
         <MDBRow>
           <MDBCol>
@@ -74,39 +149,47 @@ export default function StudentProfile(props) {
         <MDBRow>
           <MDBCol lg="4">
             <MDBCard className="shadow-1 mb-4">
-              <MDBCardBody className="text-center">
-                <MDBCardImage
-                  src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
-                  alt="avatar"
-                  className="rounded-circle"
-                  style={{ width: "150px" }}
-                  fluid
+              <MDBCardBody className="text-center d-flex flex-column align-items-center">
+                <PassportUploader
+                  onUpload={setImage}
+                  imageUrl={imageUrl}
+                  isPictureUploaded={isPictureUploaded}
                 />
-
-                <p className="text-muted mb-1">
-                  <strong>{userData.ApplicationId}</strong>
-                </p>
-                <p className="text-muted">{basicDetails.Programme}</p>
-                <p className="text-muted">
-                  <i>Department of </i> <b> {" " + basicDetails.Department}</b>
-                </p>
-                <div className="d-flex justify-content-center mb-2">
+                <div className="d-flex justify-content-center">
                   <MDBBtn
                     style={{ background: "#05321e" }}
-                    className="m-2 p-2 w-100 button"
-                    size="lg"
-                    onClick={() => {
-                      navigate("/validation");
-                    }}
+                    className="p-1 px-4 w-100 button"
+                    size="sm"
+                    onClick={uploadImageToServer}
+                    disabled={isPictureUploaded}
                   >
                     <MDBIcon
-                      size="lg"
+                      size="sm"
                       className="me-2"
                       fas
                       icon="pen-to-square"
                     />
-                    Edit Profile
+                    save picture
                   </MDBBtn>
+                </div>
+
+                {/* Other Details Below */}
+                <div className="mt-1 w-100">
+                  <p className="text-muted mb-1">
+                    <div
+                      className="m-2 p-2 w-100"
+                      style={{ background: "#daab2a", color: "white" }}
+                    >
+                      <strong>{userData.ApplicationId}</strong>
+                    </div>
+                  </p>
+                  <p className="text-muted">{basicDetails.Programme}</p>
+                  <p className="text-muted">
+                    <i>Department of </i>
+                    <b>{" " + basicDetails.Department}</b>
+                  </p>
+
+                  {/* Button Section */}
                 </div>
               </MDBCardBody>
             </MDBCard>
@@ -117,7 +200,7 @@ export default function StudentProfile(props) {
               <MDBCardBody>
                 <MDBRow>
                   <MDBCol sm="3">
-                    <MDBCardText>Full Name</MDBCardText>
+                    <MDBCardText>Fullname</MDBCardText>
                   </MDBCol>
                   <MDBCol sm="9">
                     <MDBCardText className="text-muted">
@@ -180,6 +263,6 @@ export default function StudentProfile(props) {
           </MDBCol>
         </MDBRow>
       </MDBContainer>
-    </section>
+    </div>
   );
 }

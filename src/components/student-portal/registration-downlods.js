@@ -208,26 +208,27 @@ const RegistrationDownloadsCard = () => {
     loader({ title: "Downloading", text: "please wait..." });
 
     try {
-      const response = await fetch("/notif_of_admission.pdf");
-      const existingPdfBytes = await response.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const form = pdfDoc.getForm();
+      const response = await fetch(
+        "https://api.mcchstfuntua.edu.ng/resources/download/notif_of_admin.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ application_id: appNumber }),
+        }
+      );
 
-      form.getTextField("date").setText(date);
-      form.getTextField("fullname").setText(fullname);
-      form.getTextField("applicationNumber").setText(appNumber);
-      form.getTextField("dearName").setText(applicantName);
-      form.getTextField("department").setText(department);
-      form.getTextField("programmeOffered").setText(programme);
-      form.getTextField("modeOfEntry").setText(modeOfEntry);
-      form.getTextField("level").setText(level);
-      form
-        .getTextField("commencementOfLectures")
-        .setText(commencementOfLectures);
+      if (!response.ok) throw new Error("PDF generation failed");
 
-      const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      saveAs(blob, "notification_of_admission.pdf");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "notification_of_admission.pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
 
       Swal.fire({
         title: "success",
@@ -235,6 +236,8 @@ const RegistrationDownloadsCard = () => {
         icon: "success",
       });
     } catch (error) {
+      console.error("Download error:", error);
+
       // console.error("Error processing PDF:", error);
       Swal.fire({
         title: "Error!",
@@ -243,6 +246,54 @@ const RegistrationDownloadsCard = () => {
       });
     }
   };
+
+  // const handlePrintNotifOfAdmission = async () => {
+  //   if (!isReady) {
+  //     Toast.fire({
+  //       icon: "warning",
+  //       title:
+  //         "kindly wait for the data to load. Try again in a minute or check your internet connection",
+  //     });
+  //     return;
+  //   }
+  //   loader({ title: "Downloading", text: "please wait..." });
+
+  //   try {
+  //     const response = await fetch("/notif_of_admission.pdf");
+  //     const existingPdfBytes = await response.arrayBuffer();
+  //     const pdfDoc = await PDFDocument.load(existingPdfBytes);
+  //     const form = pdfDoc.getForm();
+
+  //     form.getTextField("date").setText(date);
+  //     form.getTextField("fullname").setText(fullname);
+  //     form.getTextField("applicationNumber").setText(appNumber);
+  //     form.getTextField("dearName").setText(applicantName);
+  //     form.getTextField("department").setText(department);
+  //     form.getTextField("programmeOffered").setText(programme);
+  //     form.getTextField("modeOfEntry").setText(modeOfEntry);
+  //     form.getTextField("level").setText(level);
+  //     form
+  //       .getTextField("commencementOfLectures")
+  //       .setText(commencementOfLectures);
+
+  //     const pdfBytes = await pdfDoc.save();
+  //     const blob = new Blob([pdfBytes], { type: "application/pdf" });
+  //     saveAs(blob, "notification_of_admission.pdf");
+
+  //     Swal.fire({
+  //       title: "success",
+  //       text: "downloaded successfully",
+  //       icon: "success",
+  //     });
+  //   } catch (error) {
+  //     // console.error("Error processing PDF:", error);
+  //     Swal.fire({
+  //       title: "Error!",
+  //       text: error,
+  //       icon: "error",
+  //     });
+  //   }
+  // };
 
   const handlePrintProfile = async () => {
     if (!isReady) {

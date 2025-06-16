@@ -34,6 +34,7 @@ export const HomeDesktop = () => {
         <div className="menu-bar">
           <MenuButton label="Apply Now" navigateTo={"apply"} />
           <MenuButton label="Login" navigateTo={"login"} />
+          <MenuButton label="E-Library" navigateTo={""} />
           <MenuButton label="Our History" navigateTo={"about"} />
           <MenuButton label="Support" navigateTo={"contact"} />
         </div>

@@ -34,6 +34,7 @@ function ValidationComponent(props) {
   const [otherName, setOtherName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [admissionNumber, setAdmissionNumber] = useState("");
 
   const [address, setAddress] = useState("");
   const [dateValue, setDateValue] = useState("");
@@ -80,7 +81,7 @@ function ValidationComponent(props) {
   useEffect(() => {
     let userEmail = localStorage.getItem("userEmail");
     if (!userEmail) {
-      console.error("Email is undefined or null");
+      // console.error("Email is undefined or null");
       return;
     }
 
@@ -91,6 +92,11 @@ function ValidationComponent(props) {
           { email: userEmail },
           { headers: { "Content-Type": "application/json" } }
         );
+
+        // console.log("RET VALUES: ", response.data);
+
+        const admission = response.data.admission;
+        setAdmissionNumber(admission?.MatricNumber);
 
         const resApplication = response.data.application;
 
@@ -103,7 +109,9 @@ function ValidationComponent(props) {
         setAddress(resApplication.Address);
         setContactAddress(resApplication.ContactAddress);
         setSelState(resApplication.State);
+        setSelStateOfResidence(resApplication.StateOfResidence);
         setSelLGA(resApplication.LGA);
+        setSelLGAOfResidence(resApplication.LGAOfResidence);
         setGender(resApplication.Gender);
         setMarriageStatus(resApplication.MaritalStatus);
         setDateValue(resApplication.DoB);
@@ -135,8 +143,8 @@ function ValidationComponent(props) {
         setSponsorship(resOther.Sponsorship);
         setRoomNumber(resOther.RoomNumber);
       } catch (err) {
-        console.error("Error message:", err.response);
-        console.error("ERROR", err);
+        // console.error("Error message:", err.response);
+        // console.error("ERROR", err);
 
         Toast.fire({
           icon: "error",
@@ -155,6 +163,7 @@ function ValidationComponent(props) {
       OtherName: otherName,
       PhoneNumber: phoneNumber,
       Email: email,
+      AdmissionNumber: admissionNumber,
       Address: address,
       ContactAddress: contactAddress,
       State: selState,
@@ -190,8 +199,8 @@ function ValidationComponent(props) {
 
     if (validateBasicDetails(basicDetails)) {
       loader({
-        title: "Submitting your application",
-        text: "Please! wait while we submit your data.",
+        title: "Submitting your data",
+        text: "Please! Wait while we submit your data.",
       });
 
       await request
@@ -201,13 +210,11 @@ function ValidationComponent(props) {
         .then((response) => {
           Swal.fire({
             title: "Success!",
-            text: "Successful, you can now continue with your registration",
+            text: "Successful! Your data saved you need to login again.",
             icon: "success",
           }).then((result) => {
             if (result.isConfirmed) {
-              navigate("/portal", {
-                state: { userData: location.state.userData },
-              });
+              navigate("/login");
             }
           });
         })
@@ -302,7 +309,7 @@ function ValidationComponent(props) {
           }
         }}
         onDeleteComplete={(item) => {
-          console.log("AFTER DELETE", item);
+          // console.log("AFTER DELETE", item);
         }}
       >
         <td>{secSubject}</td>
@@ -362,14 +369,18 @@ function ValidationComponent(props) {
     setSecondryScore("default");
   }, [secScores]);
 
+  const currentYear = new Date().getFullYear(); // Gets the current year (e.g., 2025)
   let allYears = [];
+
   for (let x = 0; x <= 50; x++) {
-    allYears.push(2024 - x);
+    allYears.push(currentYear - x); // Goes back 50 years from current year
   }
 
-  const yearsList = allYears.map((year) => {
-    return <MenuItem value={year}>{year}</MenuItem>;
-  });
+  const yearsList = allYears.map((year) => (
+    <MenuItem key={year} value={year}>
+      {year}
+    </MenuItem>
+  ));
 
   return (
     <div>
@@ -457,6 +468,18 @@ function ValidationComponent(props) {
                 }}
                 required
                 disabled
+              />
+
+              <TextField
+                label="Admission Number"
+                value={admissionNumber}
+                className="center-cmp w-100"
+                variant="outlined"
+                margin="normal"
+                onChange={(e) => {
+                  setAdmissionNumber(e.target.value);
+                }}
+                required
               />
 
               <TextField
