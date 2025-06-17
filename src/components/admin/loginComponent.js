@@ -68,7 +68,7 @@ export default function AdminLoginComponent() {
                 const responseData = response.body;
 
                 if (responseData.access === "admission") {
-                  navigate("/admin/application");
+                  navigate("/admin/admission");
                 } else if (responseData.access === "finance") {
                   navigate("/admin/finance");
                 } else if (responseData.access === "application") {

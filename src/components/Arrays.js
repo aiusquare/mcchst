@@ -40,9 +40,10 @@ export const secondryScores = [
 ];
 
 export const accessRules = {
-  application: [
+  application: ["/admin/application", "/admin/list-of-applicants"],
+  admission: [
     "/admin/application",
-    "/admin/list-of-applicants",
+    "/admin/list-of-admission",
     "/admin/list-of-registered",
     "/admin/admission",
   ],
