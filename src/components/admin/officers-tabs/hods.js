@@ -234,7 +234,7 @@ const AdmissionConfirmationTab = () => {
             <input
               type="text"
               className="form-control"
-              placeholder="Search by email"
+              placeholder="Search by email, phone, or application ID"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleSearch()}

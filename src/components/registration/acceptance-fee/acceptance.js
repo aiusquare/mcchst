@@ -67,7 +67,7 @@ export const AcceptanceComponent = () => {
     const handler = window.PaystackPop.setup({
       key: "pk_live_93b81fa393853fd3d23c501294bff2f48e4cce93",
       email: userEmail,
-      amount: 100 * (applicationFees + (1.5 / 100) * applicationFees + 100),
+      amount: 100 * applicationFees,
       currency: "NGN",
       reference: paymentRef,
       onClose: () => {

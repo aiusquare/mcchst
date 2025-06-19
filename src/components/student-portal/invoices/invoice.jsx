@@ -209,10 +209,19 @@ const InvoicePage = () => {
           {invoiceData?.status === "Paid" && (
             <MDBBtn
               color="primary"
-              onClick={() => window.print()}
+              onClick={() => {
+                const data = { pay_code: payCode };
+                fetchFile(
+                  "https://api.mcchstfuntua.edu.ng/data/receipt/index.php",
+                  data,
+                  "Printing",
+                  "Please wait...",
+                  "receipt.pdf"
+                );
+              }}
               className="me-2"
             >
-              Print Invoice
+              Print Receipt
             </MDBBtn>
           )}
 
@@ -235,7 +244,7 @@ const InvoicePage = () => {
                 }}
                 className="btn btn-info mx-2"
               >
-                Print
+                Print Invoice
               </button>
             </>
           )}

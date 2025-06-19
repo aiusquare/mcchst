@@ -19,8 +19,6 @@ const StudentPaymentsDashboard = () => {
     null
   );
 
-  console.log("THE RETURNED WALLET: ", virtualAccounts);
-
   const [showModal, setShowModal] = useState(false);
   const [fundAmount, setFundAmount] = useState("");
   const [outstanding, setOutstanding] = useState(0);
@@ -198,19 +196,6 @@ const StudentPaymentsDashboard = () => {
     }
   };
 
-  // const virtualAccounts = [
-  //   {
-  //     bankName: "MoniePoint MFB",
-  //     accountNumber: "1234XXXXXXX",
-  //     accountName: "mcchct funtua",
-  //   },
-  //   {
-  //     bankName: "Wema Bank",
-  //     accountNumber: "9876XXXXXXX",
-  //     accountName: "mcchst funtua",
-  //   },
-  // ];
-
   const status =
     outstanding === 0
       ? "Cleared"
@@ -241,10 +226,16 @@ const StudentPaymentsDashboard = () => {
               <h6 className="text-muted">Wallet Balance</h6>
               <h4 className="text-success">₦{wallet.toFixed(2)}</h4>
               <button
-                onClick={() => setShowModal(true)}
+                onClick={() => {
+                  Swal.fire(
+                    "Information",
+                    "This feature is currently not available. Please pay using the account number above.",
+                    "info"
+                  );
+                }}
                 className="btn btn-warning btn-sm mt-2 w-100"
               >
-                Fund Wallet
+                Auto Funding
               </button>
             </div>
           </div>
