@@ -18,9 +18,14 @@ export default function StudentDashboard() {
 
   return (
     <ProSidebarProvider>
-      <div ref={dashboardRef} style={{ display: "flex" }}>
+      <div
+        ref={dashboardRef}
+        style={{ display: "flex", backgroundColor: "#f4f4f4" }}
+      >
         <SideNavBar />
-        <div style={{ width: "100%", height: "100vh" }}>
+        <div
+          style={{ width: "100%", height: "100%", backgroundColor: "#f4f4f4" }}
+        >
           <div>
             <TopBar />
             <Menu open={openMenu}>

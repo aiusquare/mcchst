@@ -96,7 +96,7 @@ function ValidationComponent(props) {
         // console.log("RET VALUES: ", response.data);
 
         const admission = response.data.admission;
-        setAdmissionNumber(admission?.MatricNumber);
+        // setAdmissionNumber(admission?.MatricNumber);
 
         const resApplication = response.data.application;
 
@@ -163,7 +163,6 @@ function ValidationComponent(props) {
       OtherName: otherName,
       PhoneNumber: phoneNumber,
       Email: email,
-      AdmissionNumber: admissionNumber,
       Address: address,
       ContactAddress: contactAddress,
       State: selState,
@@ -470,17 +469,16 @@ function ValidationComponent(props) {
                 disabled
               />
 
-              <TextField
-                label="Admission Number"
+              {/* <TextField */}
+                {/* label="Admission Number"
                 value={admissionNumber}
                 className="center-cmp w-100"
                 variant="outlined"
                 margin="normal"
                 onChange={(e) => {
-                  setAdmissionNumber(e.target.value);
+                  // setAdmissionNumber(e.target.value);
                 }}
-                required
-              />
+              /> */}
 
               <TextField
                 label="NIN Number"

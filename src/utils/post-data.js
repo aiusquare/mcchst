@@ -3,8 +3,17 @@ import axios from "axios";
 import { loader } from "../components/LoadingSpinner";
 import { Toast } from "../components/errorNotifier";
 
-export async function postData(url, reqData, loadingTitle, loadingText) {
+export async function postData(
+  url,
+  reqData,
+  loadingTitle = null,
+  loadingText = null
+) {
   if (!url) return;
+  if (!reqData) {
+    console.error("Request data is required");
+    return;
+  }
 
   if (loadingTitle !== null) {
     loader({

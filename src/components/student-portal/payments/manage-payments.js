@@ -5,7 +5,7 @@ import request from "superagent";
 import { loader } from "../../LoadingSpinner";
 import { Toast } from "../../errorNotifier";
 import Swal from "sweetalert2";
-import { baseUrl } from "../../../services/setup";
+import { baseUrl, paystackPublicKey } from "../../../services/setup";
 import usePostFetch from "../../../hooks/usePostFetch";
 
 const StudentPaymentsDashboard = () => {
@@ -127,7 +127,7 @@ const StudentPaymentsDashboard = () => {
       // localStorage.setItem("paymentRef", paymentRef);
 
       const payData = {
-        key: "pk_live_93b81fa393853fd3d23c501294bff2f48e4cce93",
+        key: paystackPublicKey,
         email: userEmail,
         amount: parseInt(fundAmount * 100, 10),
         currency: "NGN",
@@ -229,7 +229,7 @@ const StudentPaymentsDashboard = () => {
                 onClick={() => {
                   Swal.fire(
                     "Information",
-                    "This feature is currently not available. Please pay using the account number above.",
+                    "This feature is currently not available. Please pay using the account number below.",
                     "info"
                   );
                 }}

@@ -91,6 +91,15 @@ const RegistrationDownloadsCard = () => {
       return;
     }
 
+    if (!matNumber) {
+      Swal.fire({
+        icon: "info",
+        title: "Matric Number Missing",
+        text: "You need to get Admission number first before downloading this form. Please goto registry to complete your registration.",
+      });
+      return;
+    }
+
     loader({ title: "Downloading", text: "please wait..." });
 
     const fetchData = async () => {
@@ -118,7 +127,7 @@ const RegistrationDownloadsCard = () => {
           const form = pdfDoc.getForm();
 
           form.getTextField("name").setText(fullname);
-          form.getTextField("regNo").setText(appNumber);
+          form.getTextField("regNo").setText(matNumber);
           form.getTextField("session").setText(sessionOfEntry);
           form.getTextField("department").setText(department);
           form.getTextField("programme").setText(programmeCode);
@@ -247,54 +256,6 @@ const RegistrationDownloadsCard = () => {
     }
   };
 
-  // const handlePrintNotifOfAdmission = async () => {
-  //   if (!isReady) {
-  //     Toast.fire({
-  //       icon: "warning",
-  //       title:
-  //         "kindly wait for the data to load. Try again in a minute or check your internet connection",
-  //     });
-  //     return;
-  //   }
-  //   loader({ title: "Downloading", text: "please wait..." });
-
-  //   try {
-  //     const response = await fetch("/notif_of_admission.pdf");
-  //     const existingPdfBytes = await response.arrayBuffer();
-  //     const pdfDoc = await PDFDocument.load(existingPdfBytes);
-  //     const form = pdfDoc.getForm();
-
-  //     form.getTextField("date").setText(date);
-  //     form.getTextField("fullname").setText(fullname);
-  //     form.getTextField("applicationNumber").setText(appNumber);
-  //     form.getTextField("dearName").setText(applicantName);
-  //     form.getTextField("department").setText(department);
-  //     form.getTextField("programmeOffered").setText(programme);
-  //     form.getTextField("modeOfEntry").setText(modeOfEntry);
-  //     form.getTextField("level").setText(level);
-  //     form
-  //       .getTextField("commencementOfLectures")
-  //       .setText(commencementOfLectures);
-
-  //     const pdfBytes = await pdfDoc.save();
-  //     const blob = new Blob([pdfBytes], { type: "application/pdf" });
-  //     saveAs(blob, "notification_of_admission.pdf");
-
-  //     Swal.fire({
-  //       title: "success",
-  //       text: "downloaded successfully",
-  //       icon: "success",
-  //     });
-  //   } catch (error) {
-  //     // console.error("Error processing PDF:", error);
-  //     Swal.fire({
-  //       title: "Error!",
-  //       text: error,
-  //       icon: "error",
-  //     });
-  //   }
-  // };
-
   const handlePrintProfile = async () => {
     if (!isReady) {
       Toast.fire({
@@ -304,6 +265,16 @@ const RegistrationDownloadsCard = () => {
       });
       return;
     }
+
+    if (!matNumber) {
+      Swal.fire({
+        title: "Matric Number Missing",
+        text: "You need to get Admission number first before downloading this form. Please goto registry to complete your registration.",
+        icon: "info",
+      });
+      return;
+    }
+
     loader({ title: "Downloading", text: "please wait..." });
 
     const fetchData = async () => {
@@ -579,6 +550,7 @@ const RegistrationDownloadsCard = () => {
               onClick={() => {
                 navigate("/validation");
               }}
+              disabled
             >
               <MDBIcon size="lg" className="me-2" fas icon="pen-to-square" />
               Edit Profile

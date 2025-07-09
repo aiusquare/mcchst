@@ -34,11 +34,11 @@ const SideNavBar = () => {
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex" }}>
+    <div style={{  display: "flex" }}>
       <Sidebar
         breakPoint="sm"
         transitionDuration={800}
-        style={{ height: "100vh", background: "#ffffff" }}
+        style={{  background: "#ffffff" }}
       >
         <Menu>
           <div style={{ display: "flex" }}>
@@ -109,6 +109,15 @@ const SideNavBar = () => {
               icon={<BarIcons img={financeIcon} />}
             >
               Billing
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("transactions");
+              }}
+              icon={<BarIcons img={financeIcon} />}
+            >
+              Tranasactions
             </MenuItem>
           </SubMenu>
 

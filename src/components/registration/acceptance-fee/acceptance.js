@@ -7,6 +7,7 @@ import "./style.css";
 import { MDBCol, MDBRow } from "mdb-react-ui-kit";
 import { Toast } from "../../errorNotifier";
 import { loader } from "../../LoadingSpinner";
+import { paystackPublicKey, paystackTestKey } from "../../../services/setup";
 
 export const AcceptanceComponent = () => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ export const AcceptanceComponent = () => {
     // console.log("PAY REF", paymentRef);
 
     const handler = window.PaystackPop.setup({
-      key: "pk_live_93b81fa393853fd3d23c501294bff2f48e4cce93",
+      key: paystackPublicKey,
       email: userEmail,
       amount: 100 * applicationFees,
       currency: "NGN",
@@ -107,7 +108,7 @@ export const AcceptanceComponent = () => {
         icon: "success",
       });
 
-      navigate("/registration", {
+      navigate("/login", {
         state: { userData: location.state.userData },
       });
     } catch (err) {

@@ -12,8 +12,8 @@ import { useEffect } from "react";
 import request from "superagent";
 import { baseUrl } from "../../../services/setup";
 import Swal from "sweetalert2";
-import { loader } from "../../LoadingSpinner";
-import { Toast } from "../../errorNotifier";
+import { Toast } from "../../../utils/toast";
+import { loader } from "../../../utils/loading-spinner";
 
 const ListOfAdminInvoices = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ const ListOfAdminInvoices = () => {
       .type("application/json")
       .then((response) => {
         setInvoices(response.body);
-        // console.log("RET INVOICES LIST", response.body);
+        console.log("RET INVOICES LIST", response.body);
       })
       .catch((err) => {
         // let errorText = err.response.text;
@@ -130,7 +130,7 @@ const ListOfAdminInvoices = () => {
             <th>Amount</th>
             <th>Invoice Code</th>
             <th>Invoice Date</th>
-            <th>Delete</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -155,7 +155,19 @@ const ListOfAdminInvoices = () => {
                     handleRemoveInvoice(invoice.invoice_code);
                   }}
                 >
-                  <i className="fas fa-trash-alt me-1"></i> Remove
+                  <i className="fas fa-trash-alt "></i> Remove
+                </button>
+
+                <button
+                  className="btn  btn-info ms-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/admin/edit-invoice`, {
+                      state: { invoiceData: invoice },
+                    });
+                  }}
+                >
+                  <i className="fas fa-edit me-1"></i> Edit
                 </button>
               </td>
             </tr>

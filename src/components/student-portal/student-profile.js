@@ -180,7 +180,11 @@ export default function StudentProfile(props) {
                       className="m-2 p-2 w-100"
                       style={{ background: "#daab2a", color: "white" }}
                     >
-                      <strong>{userData.ApplicationId}</strong>
+                      <strong>
+                        {basicDetails.MatricNumber
+                          ? basicDetails.MatricNumber
+                          : userData.ApplicationId}
+                      </strong>
                     </div>
                   </p>
                   <p className="text-muted">{basicDetails.Programme}</p>

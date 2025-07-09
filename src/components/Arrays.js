@@ -179,16 +179,19 @@ export const admissionProgrammes = [
       {
         programme: "Certificate in Community Health",
         programmeCode: "JCHEW",
+        admissionCode: "JC",
         duration: "2 Years",
       },
       {
         programme: "Diploma in Community Health",
         programmeCode: "CHEW",
+        admissionCode: "CH",
         duration: "3 Years",
       },
       {
         programme: "ND in Community Health",
         programmeCode: "ND CHEW",
+        admissionCode: "NC",
         duration: "2 Years",
       },
     ],
@@ -199,11 +202,13 @@ export const admissionProgrammes = [
       {
         programme: "ND in Medical Laboratory Technology",
         programmeCode: "ND MLT",
+        admissionCode: "MT",
         duration: "2 Years",
       },
       {
         programme: "Diploma in Medical Laboratory Technician",
         programmeCode: "MLT",
+        admissionCode: "MT",
         duration: "3 Years",
       },
     ],
@@ -214,6 +219,7 @@ export const admissionProgrammes = [
       {
         programme: "ND in Public Health Technology",
         programmeCode: "ND PHT",
+        admissionCode: "PH",
         duration: "2 Years",
       },
     ],
@@ -224,11 +230,13 @@ export const admissionProgrammes = [
       {
         programme: "ND in Health Information Management",
         programmeCode: "ND HIM",
+        admissionCode: "HM",
         duration: "2 Years",
       },
       {
         programme: "HND in Health Information Management",
         programmeCode: "HND HIM",
+        admissionCode: "HM",
         duration: "2 Years",
       },
     ],
@@ -239,6 +247,7 @@ export const admissionProgrammes = [
       {
         programme: "Diploma in Pharmacy Technician",
         programmeCode: "DPT",
+        admissionCode: "PT",
         duration: "3 Years",
       },
     ],
@@ -249,16 +258,25 @@ export const admissionProgrammes = [
       {
         programme: "ND in Dental Technology",
         programmeCode: "ND DTE",
+        admissionCode: "DT",
         duration: "2 Years",
       },
       {
         programme: "ND in Dental Therapy",
         programmeCode: "ND DT",
+        admissionCode: "NDT",
         duration: "2 Years",
       },
       {
         programme: "HND in Dental Therapy",
         programmeCode: "HND DT",
+        admissionCode: "HDT",
+        duration: "2 Years",
+      },
+      {
+        programme: "HND in Dental Technology",
+        programmeCode: "HND DT",
+        admissionCode: "DT",
         duration: "2 Years",
       },
     ],
@@ -269,11 +287,13 @@ export const admissionProgrammes = [
       {
         programme: "ND in Environmental Health",
         programmeCode: "ND EH",
+        admissionCode: "EH",
         duration: "2 Years",
       },
       {
         programme: "HND in Environmental Health",
         programmeCode: "HND EH",
+        admissionCode: "EH",
         duration: "2 Years",
       },
     ],

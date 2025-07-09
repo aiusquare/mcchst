@@ -16,8 +16,6 @@ import { baseUrl } from "../../../services/setup";
 import Swal from "sweetalert2";
 import { Toast } from "../../errorNotifier";
 import { loader } from "../../LoadingSpinner";
-import usePostFetch from "../../../hooks/usePostFetch";
-import usePost from "../../../hooks/usePost";
 import { postData } from "../../../utils/post-data";
 import { fetchFile } from "../../../utils/fetch-file";
 
@@ -38,28 +36,23 @@ const InvoicePage = () => {
       setInvoiceData(incData);
       setPayCode(incData.pay_id);
 
-      const invoiceData = {
-        invoiceId: incData.invoice_code,
-      };
+      const fetchFeesList = async () => {
+        const invoiceItems = await postData(
+          baseUrl + "invoices/get_invoice_items_by_id/",
+          {
+            invoiceId: incData.invoice_code,
+          }
+        );
 
-      const fetchInvoiceItems = () => {
-        request
-          .post(baseUrl + "invoices/get_invoice_items_by_id/")
-          .type("application/json")
-          .send(invoiceData)
-          .then((response) => {
-            const total = response.body.reduce(
-              (sum, item) => sum + (parseFloat(item.amount) || 0),
-              0
-            );
+        if (invoiceItems) {
+          const total = invoiceItems.reduce(
+            (sum, item) => sum + (parseFloat(item.amount) || 0),
+            0
+          );
 
-            setTotal(total);
-            setInvoiceItems(response.body);
-          })
-          .catch((err) => {
-            // let errorText = err.response.text;
-            // console.log("Error message:", err.response);
-          });
+          setTotal(total);
+          setInvoiceItems(invoiceItems);
+        }
       };
 
       const fetchBalance = () => {
@@ -77,7 +70,7 @@ const InvoicePage = () => {
           });
       };
 
-      fetchInvoiceItems();
+      fetchFeesList();
       fetchBalance();
     }
   }, []);
@@ -115,11 +108,7 @@ const InvoicePage = () => {
         icon: "success",
       });
 
-      // Option 1: Redirect to invoice history or confirmation page
       navigate("/portal/invoices");
-
-      // Option 2 (alternative): trigger data refresh if staying on same page
-      // fetchInvoiceItems();  // Call your fetching logic again if needed
     } catch (err) {
       Swal.fire({
         title: "Payment Failed!",
@@ -128,6 +117,18 @@ const InvoicePage = () => {
       });
     }
   };
+
+  useEffect(() => {
+    // Set the viewport width to 1024 when the component mounts
+    const metaTag = document.querySelector('meta[name="viewport"]');
+    metaTag.setAttribute("content", "width=1024");
+
+    // Clean up the effect when the component unmounts
+    return () => {
+      // Restore the original viewport settings
+      metaTag.setAttribute("content", "width=device-width, initial-scale=1");
+    };
+  }, []);
 
   return (
     <MDBContainer className="py-4">
@@ -210,7 +211,7 @@ const InvoicePage = () => {
             <MDBBtn
               color="primary"
               onClick={() => {
-                const data = { pay_code: payCode };
+                const data = { pay_code: payCode, mode: "invoice" };
                 fetchFile(
                   "https://api.mcchstfuntua.edu.ng/data/receipt/index.php",
                   data,

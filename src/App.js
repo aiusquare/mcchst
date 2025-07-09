@@ -46,6 +46,8 @@ import InvoiceList from "./components/student-portal/invoices/invoices";
 import AdminPasswordCreationForm from "./components/create-password";
 import StudentPaymentsDashboard from "./components/student-portal/payments/manage-payments";
 import ListOfAdminInvoices from "./components/admin/pages/list-of-invoices";
+import StudentTransactionsList from "./pages/students/payments/transactons/Transactions";
+import EditInvoice from "./pages/admin/finance/EditInvoice";
 
 function App() {
   return (
@@ -225,6 +227,15 @@ function App() {
           />
 
           <Route
+            path="edit-invoice" 
+            element={
+              <ProtectedUrlRoute>
+                <EditInvoice />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
             path="raised-invoices"
             element={
               <ProtectedUrlRoute>
@@ -282,6 +293,7 @@ function App() {
           <Route path="acc-calender" element={<AcademicCalender />} />
           <Route path="invoice" element={<InvoicePage />} />
           <Route path="invoices" element={<InvoiceList />} />
+          <Route path="transactions" element={<StudentTransactionsList />} />
           <Route
             path="manage-payments"
             element={<StudentPaymentsDashboard />}
