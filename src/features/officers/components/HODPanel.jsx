@@ -1,11 +1,18 @@
-import "../../admin/css/style.css";
-
-import { MDBBtn, MDBInput } from "mdb-react-ui-kit";
-
-import { useEffect } from "react";
-import { useState } from "react";
-import request from "superagent";
-import Box from "@mui/material/Box";
+import React, { useState, useEffect } from "react";
+import { Box, Tabs, Tab } from "@mui/material";
+import {
+  MDBCard,
+  MDBCardBody,
+  MDBCardTitle,
+  MDBCardText,
+  MDBTable,
+  MDBTableHead,
+  MDBTableBody,
+  MDBBtn,
+  MDBInput,
+  MDBRow,
+  MDBCol,
+} from "mdb-react-ui-kit";
 import {
   Grid,
   Table,
@@ -15,41 +22,35 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-
 import { Checkbox } from "@material-ui/core";
 import axios from "axios";
-import { Toast } from "../../errorNotifier";
-import { postData } from "../../../utils/post-data";
-import { admissionProgrammes } from "../../Arrays";
+import request from "superagent";
+import { Toast } from "../../../components/errorNotifier";
 import { baseUrl } from "../../../services/setup";
+import TabPanel from "./TabPanel";
 
-export default function StudentsAffairsTab() {
-  return (
-    <div>
-      <AdmissionNumberTab />
-    </div>
-  );
-}
-
-const AdmissionNumberTab = () => {
+// Admission Confirmation Component
+const AdmissionConfirmation = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [user, setUser] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [hasMatricNumber, setHasMatricNumber] = useState(false);
 
   const handleSearch = async () => {
     setLoading(true);
     setError("");
     setUser(null);
 
+    const department = localStorage.getItem("department");
+
     try {
       const response = await axios.post(
-        baseUrl + "officers/sao_user_search",
+        baseUrl + "officers/hod_user_search",
         {
           searchId: searchTerm,
+          department: department,
         },
         {
           headers: {
@@ -58,13 +59,10 @@ const AdmissionNumberTab = () => {
         }
       );
 
-      // Assuming the API returns the data in response.data
       const data = response.data.data;
 
       if (data) {
-        setUser(data); // Take first match
-        setHasMatricNumber(data.MatricNumber ? true : false);
-        // setIsVerified(data[0].verified || false); // Set initial verification status
+        setUser(data);
       } else {
         setError("No user found with that information");
       }
@@ -75,7 +73,6 @@ const AdmissionNumberTab = () => {
         err.message ||
         "Failed to search for user";
       setError(errorMessage);
-
       Toast.fire({
         icon: "error",
         title: errorMessage,
@@ -95,49 +92,24 @@ const AdmissionNumberTab = () => {
     try {
       if (!isVerified) {
         setError("Please check the verification box");
-        return; // Stop the function if not verified
-      }
-
-      const admissionCode = admissionProgrammes
-        .flatMap((dept) => dept.programmes)
-        .find(
-          (prog) => prog.programmeCode === user.ProgrammeCode
-        )?.admissionCode;
-
-      if (!admissionCode) {
-        setError("Invalid programme code, please contact admin");
         return;
       }
 
-      const candidateData = {
-        programme_name: user.Programme,
-        programme_code: admissionCode,
-        entry_session: user.SessionOfEntry,
-        application_no: user.ApplicationNo,
-      };
+      const response = await fetch(baseUrl + `Officers/hod_confirm_candidate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: user.Email }),
+      });
 
-      const retData = await postData(
-        baseUrl + "officers/generate_matric_number",
-        candidateData,
-        "Generating Admission Number",
-        "Generating admission number for " + user.Fullname
-      );
-
-      if (retData) {
-        setSuccess("Generated successfully: " + retData);
-        Toast.fire({
-          icon: "success",
-          title: "Generated successfully",
-        });
+      if (response.ok) {
+        setSuccess("User verification status updated successfully");
         setUser(null);
       } else {
         throw new Error("Failed to update verification status");
       }
     } catch (err) {
-      Toast.fire({
-        icon: "error",
-        title: err.message || "An error occurred while processing",
-      });
       setError(err.message);
     } finally {
       setLoading(false);
@@ -146,9 +118,8 @@ const AdmissionNumberTab = () => {
 
   return (
     <div className="container my-5">
-      <h4 className="mb-4 fw-bold">Student Registration</h4>
+      <h4 className="mb-4 fw-bold">Student Confirmation</h4>
 
-      {/* Search Section */}
       <div className="row g-2 align-items-center mb-3">
         <div className="col-md-9">
           <input
@@ -178,7 +149,6 @@ const AdmissionNumberTab = () => {
         </div>
       </div>
 
-      {/* Error/Success Messages */}
       {error && (
         <div className="alert alert-danger mb-3" role="alert">
           {error}
@@ -190,17 +160,12 @@ const AdmissionNumberTab = () => {
         </div>
       )}
 
-      {/* User Display Section */}
       {user && (
         <div className="mt-4">
           <h5 className="fw-semibold mb-3">Candidate Information</h5>
           <div className="table-responsive mb-3">
             <table className="table table-bordered table-sm">
               <tbody>
-                <tr>
-                  <th scope="row">Matric Number</th>
-                  <td>{user.MatricNumber}</td>
-                </tr>
                 <tr>
                   <th scope="row" style={{ width: "150px" }}>
                     Fullname
@@ -219,7 +184,6 @@ const AdmissionNumberTab = () => {
                   <th scope="row">Application ID</th>
                   <td>{user.ApplicationNo}</td>
                 </tr>
-
                 <tr>
                   <th scope="row">Programme</th>
                   <td>{user.Programme}</td>
@@ -236,14 +200,14 @@ const AdmissionNumberTab = () => {
               checked={isVerified}
               onChange={(e) => setIsVerified(e.target.checked)}
             />
-            I Confirm/Verify that this candidate meets all requirements for
-            Registration.
+            I Confirm/Verify that this candidate meets all requirements for this
+            programme.
           </div>
 
           <button
             className="btn btn-success"
             onClick={handleSubmitVerification}
-            disabled={loading || hasMatricNumber}
+            disabled={loading}
           >
             {loading ? (
               <div
@@ -251,7 +215,7 @@ const AdmissionNumberTab = () => {
                 role="status"
               />
             ) : (
-              "Generate Admission Number"
+              "Submit Verification"
             )}
           </button>
         </div>
@@ -260,7 +224,83 @@ const AdmissionNumberTab = () => {
   );
 };
 
-const ClearanceTab = () => {
+const HODDashboard = () => (
+  <MDBCard>
+    <MDBCardBody>
+      <MDBCardTitle>Department Overview</MDBCardTitle>
+      <MDBCardText>
+        Current semester statistics and department activities
+      </MDBCardText>
+      {/* Add dashboard stats here */}
+    </MDBCardBody>
+  </MDBCard>
+);
+
+const StudentManagement = () => (
+  <MDBCard>
+    <MDBCardBody>
+      <MDBTable hover>
+        <MDBTableHead>
+          <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Actions</th>
+          </tr>
+        </MDBTableHead>
+        <MDBTableBody>{/* Student list will be populated here */}</MDBTableBody>
+      </MDBTable>
+    </MDBCardBody>
+  </MDBCard>
+);
+
+const CourseManagement = () => (
+  <MDBCard>
+    <MDBCardBody>
+      <MDBCardTitle>Course Management</MDBCardTitle>
+      <MDBTable hover>
+        <MDBTableHead>
+          <tr>
+            <th>Course Code</th>
+            <th>Title</th>
+            <th>Units</th>
+            <th>Level</th>
+            <th>Actions</th>
+          </tr>
+        </MDBTableHead>
+        <MDBTableBody>{/* Course list will be populated here */}</MDBTableBody>
+      </MDBTable>
+    </MDBCardBody>
+  </MDBCard>
+);
+
+const ResultsManagement = () => (
+  <MDBCard>
+    <MDBCardBody>
+      <MDBCardTitle>Results Management</MDBCardTitle>
+      <div className="mb-3">
+        <MDBBtn color="primary" className="me-2">
+          Upload Results
+        </MDBBtn>
+        <MDBBtn color="secondary">Generate Reports</MDBBtn>
+      </div>
+      <MDBTable hover>
+        <MDBTableHead>
+          <tr>
+            <th>Course</th>
+            <th>Session</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </MDBTableHead>
+        <MDBTableBody>{/* Results list will be populated here */}</MDBTableBody>
+      </MDBTable>
+    </MDBCardBody>
+  </MDBCard>
+);
+
+// Student Clearance Component
+const StudentClearance = () => {
   const [rows, setRows] = useState([]);
   const [isReady, setIsReady] = useState(false);
 
@@ -269,45 +309,37 @@ const ClearanceTab = () => {
   }, []);
 
   const handleFetchData = async () => {
-    if (isReady) {
-      return;
-    }
-    if (rows.length > 0) return; // Prevents unnecessary fetches
+    if (isReady || rows.length > 0) return;
 
     try {
-      await request
+      const response = await request
         .get(
           "https://api.mcchstfuntua.edu.ng/clearance/sao/uncleared/index.php"
         )
-        .type("application/json")
-        .then((response) => {
-          console.log("FETCH RES: ", response.body);
+        .type("application/json");
 
-          setRows(response.body);
-          setIsReady(true);
-        });
+      setRows(response.body);
+      setIsReady(true);
     } catch (err) {
-      // console.log(err);
+      console.error(err);
     }
   };
 
   const handleSubmit = () => {
     const formData = rows
-      .map((row) => {
-        const fulfilledChecked = document.getElementById(
+      .map((row) => ({
+        MatricNumber: row.MatricNumber,
+        SAOFulfiledRegistrationRequirements: document.getElementById(
           `fulfilled-${row.MatricNumber}`
-        ).checked;
-        const submittedChecked = document.getElementById(
+        ).checked
+          ? "yes"
+          : "no",
+        SAOConfirmedSubmissionToHOD: document.getElementById(
           `submitted-${row.MatricNumber}`
-        ).checked;
-
-        return {
-          MatricNumber: row.MatricNumber,
-          SAOFulfiledRegistrationRequirements: fulfilledChecked ? "yes" : "no",
-          SAOConfirmedSubmissionToHOD: submittedChecked ? "yes" : "no",
-        };
-      })
-      // Filter rows where at least one checkbox is checked ("yes")
+        ).checked
+          ? "yes"
+          : "no",
+      }))
       .filter(
         (row) =>
           row.SAOFulfiledRegistrationRequirements === "yes" ||
@@ -315,33 +347,28 @@ const ClearanceTab = () => {
       );
 
     console.log("Filtered submitted data:", formData);
-    // Send only filtered data to API
-    // Example:
-    // request.post("your-api-endpoint").send(formData).then(...)
   };
 
-  const StudentRow = ({ std, index }) => {
-    return (
-      <TableRow key={std.MatricNumber}>
-        <TableCell>{std.Fullname}</TableCell>
-        <TableCell>{std.MatricNumber}</TableCell>
-        <TableCell>{std.Department}</TableCell>
-        <TableCell>{std.Programme}</TableCell>
-        <TableCell>
-          <Checkbox
-            id={`fulfilled-${std.MatricNumber}`}
-            defaultChecked={std.SAOFulfiledRegistrationRequirements === "yes"}
-          />
-        </TableCell>
-        <TableCell>
-          <Checkbox
-            id={`submitted-${std.MatricNumber}`}
-            defaultChecked={std.SAOConfirmedSubmissionToHOD === "yes"}
-          />
-        </TableCell>
-      </TableRow>
-    );
-  };
+  const StudentRow = ({ std }) => (
+    <TableRow key={std.MatricNumber}>
+      <TableCell>{std.Fullname}</TableCell>
+      <TableCell>{std.MatricNumber}</TableCell>
+      <TableCell>{std.Department}</TableCell>
+      <TableCell>{std.Programme}</TableCell>
+      <TableCell>
+        <Checkbox
+          id={`fulfilled-${std.MatricNumber}`}
+          defaultChecked={std.SAOFulfiledRegistrationRequirements === "yes"}
+        />
+      </TableCell>
+      <TableCell>
+        <Checkbox
+          id={`submitted-${std.MatricNumber}`}
+          defaultChecked={std.SAOConfirmedSubmissionToHOD === "yes"}
+        />
+      </TableCell>
+    </TableRow>
+  );
 
   return (
     <div>
@@ -355,8 +382,6 @@ const ClearanceTab = () => {
           </MDBBtn>
         </Grid>
       </Grid>
-
-      {/* Table */}
 
       <TableContainer sx={{ maxHeight: 400, mb: 2 }}>
         <Table stickyHeader>
@@ -383,23 +408,13 @@ const ClearanceTab = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((std, index) => (
-              <StudentRow
-                key={std.MatricNumber}
-                std={std}
-                index={index}
-                onChange={(updatedStd) => {
-                  const updatedRows = [...rows];
-                  updatedRows[index] = updatedStd;
-                  setRows(updatedRows);
-                }}
-              />
+            {rows.map((std) => (
+              <StudentRow key={std.MatricNumber} std={std} />
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {/* Submit Button */}
       <Box display="flex" justifyContent="center">
         <MDBBtn
           variant="contained"
@@ -409,7 +424,50 @@ const ClearanceTab = () => {
           Submit
         </MDBBtn>
       </Box>
-      {/* </TabPanel> */}
     </div>
   );
 };
+
+const HODPanel = () => {
+  const [activeTab, setActiveTab] = useState(0);
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
+
+  return (
+    <div>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          aria-label="hod management tabs"
+        >
+          <Tab label="Dashboard" />
+          <Tab label="Admission Confirmation" />
+          <Tab label="Student Clearance" />
+          <Tab label="Courses" />
+          <Tab label="Results" />
+        </Tabs>
+      </Box>
+
+      <TabPanel value={activeTab} index={0}>
+        <HODDashboard />
+      </TabPanel>
+      <TabPanel value={activeTab} index={1}>
+        <AdmissionConfirmation />
+      </TabPanel>
+      <TabPanel value={activeTab} index={2}>
+        <StudentClearance />
+      </TabPanel>
+      <TabPanel value={activeTab} index={3}>
+        <CourseManagement />
+      </TabPanel>
+      <TabPanel value={activeTab} index={4}>
+        <ResultsManagement />
+      </TabPanel>
+    </div>
+  );
+};
+
+export default HODPanel;

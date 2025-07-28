@@ -11,7 +11,7 @@ import {
   MDBRow,
 } from "mdb-react-ui-kit";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import request from "superagent";
 import Swal from "sweetalert2";
 import {
@@ -48,174 +48,128 @@ export default function EditInvoice() {
   const [feeDescription, setFeeDescription] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
   const [invoiceTitle, setInvoiceTitle] = useState("");
+  const [totalInvoiceAmount, setTotalInvoiceAmount] = useState(0);
 
-  const handleDepartmentChange = (e) => {
+  const handleDepartmentChange = useCallback((e) => {
     const selectedDept = e.target.value;
     setDepartment(selectedDept);
-
     const departmentData = admissionProgrammes.find(
       (dept) => dept.department === selectedDept
     );
-
     if (!departmentData || !departmentData.programmes?.length) {
       setProgrammesList([]);
       setProgramme("");
+      setProgrammeCode("");
       return;
     }
-
-    const programmes = departmentData.programmes;
-    setProgrammesList(programmes);
-
-    const defaultProgramme = programmes[0];
+    setProgrammesList(departmentData.programmes);
+    const defaultProgramme = departmentData.programmes[0];
     setProgramme(defaultProgramme.programme);
     setProgrammeCode(defaultProgramme.programmeCode);
-  };
+  }, [admissionProgrammes]);
 
-  const handleProgrammeChange = (e) => {
+
+  const handleProgrammeChange = useCallback((e) => {
     const selectedProgramme = e.target.value;
-    setProgramme(selectedProgramme); // keep state in sync
-    programmeChange(selectedProgramme);
-  };
-
-  const programmeChange = (selectedProgramme) => {
+    setProgramme(selectedProgramme);
     if (!Array.isArray(programmesList)) return;
-
     const retProgramme = programmesList.find(
       (programme) => programme.programme === selectedProgramme
     );
-
-    if (!retProgramme) {
-      console.warn("Programme not found in the list.");
-      return;
+    if (retProgramme) {
+      setProgrammeCode(retProgramme.programmeCode);
     }
+  }, [programmesList]);
 
-    // Set programme and programmeCode
-    setProgramme(retProgramme.programme);
-    setProgrammeCode(retProgramme.programmeCode); // <-- Make sure setProgrammeCode exists in your state
-  };
 
-  const createInvoice = async () => {
-    if (navigator.onLine) {
-      // progress spinner
-      loader({
-        title: "Creating",
-        text: "Please! wait.",
-      });
-
-      const incoiceData = {
-        invoiceItems: feesList,
-        target: target,
-        targetSession: targetSession,
-        specificTarget: specificTarget,
-        department: department,
-        programme: programme,
-        programmeCode: programmeCode,
-        deptSession: deptSession,
-        studentId: studentId,
-        invoiceTitle: invoiceTitle,
-      };
-
-      await request
-        .post(baseUrl + "invoices/generate_invoice")
-        .type("application/json")
-        .send(incoiceData)
-        .then((response) => {
-          Toast.fire({
-            icon: "success",
-            title: "Invoice created successfully",
-          });
-        })
-        .catch((err) => {
-          // let errorText = err.response.text;
-          console.log("Error message:", err.response);
-
-          Swal.fire({
-            title: "Error!",
-            text: "There is occoured an error",
-            icon: "error",
-          });
-        });
-    } else {
+  const createInvoice = useCallback(async () => {
+    if (!navigator.onLine) {
       Toast.fire({
         icon: "error",
         title: "No internet connection",
       });
+      return;
     }
-  };
+    loader({
+      title: "Creating",
+      text: "Please! wait.",
+    });
+    const incoiceData = {
+      invoiceItems: feesList,
+      target,
+      targetSession,
+      specificTarget,
+      department,
+      programme,
+      programmeCode,
+      deptSession,
+      studentId,
+      invoiceTitle,
+    };
+    try {
+      await request
+        .post(baseUrl + "invoices/edit_invoice")
+        .type("application/json")
+        .send(incoiceData);
+      Toast.fire({
+        icon: "success",
+        title: "Invoice created successfully",
+      });
+    } catch (err) {
+      console.log("Error message:", err.response);
+      Swal.fire({
+        title: "Error!",
+        text: "There is occoured an error",
+        icon: "error",
+      });
+    }
+  }, [feesList, target, targetSession, specificTarget, department, programme, programmeCode, deptSession, studentId, invoiceTitle]);
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = useCallback(() => {
     if (feesList.length === 0) {
-      Toast.fire({
-        icon: "error",
-        title: "No fees added",
-      });
+      Toast.fire({ icon: "error", title: "No fees added" });
       return;
     }
-
-    if (target === "") {
-      Toast.fire({
-        icon: "error",
-        title: "Target not selected",
-      });
+    if (!target) {
+      Toast.fire({ icon: "error", title: "Target not selected" });
       return;
     }
-
-    if (target === "Specific Target" && specificTarget === "") {
-      Toast.fire({
-        icon: "error",
-        title: "Specific target not selected",
-      });
-      return;
-    } else if (target === "Specific Target" && specificTarget === "session") {
-      if (targetSession === "") {
-        Toast.fire({
-          icon: "error",
-          title: "Session not selected",
-        });
+    if (target === "Specific Target") {
+      if (!specificTarget) {
+        Toast.fire({ icon: "error", title: "Specific target not selected" });
         return;
       }
-    } else if (
-      target === "Specific Target" &&
-      specificTarget === "department"
-    ) {
-      if (deptSession === "") {
-        Toast.fire({
-          icon: "error",
-          title: "Session not selected",
-        });
-        return;
-      } else if (department === "") {
-        Toast.fire({
-          icon: "error",
-          title: "Department not selected",
-        });
-        return;
-      } else if (programme === "") {
-        Toast.fire({
-          icon: "error",
-          title: "Programme not selected",
-        });
+      if (specificTarget === "session" && !targetSession) {
+        Toast.fire({ icon: "error", title: "Session not selected" });
         return;
       }
-    } else if (target === "Specific Target" && specificTarget === "student") {
-      if (studentId === "") {
-        Toast.fire({
-          icon: "error",
-          title: "Student ID not provided",
-        });
+      if (specificTarget === "department") {
+        if (!deptSession) {
+          Toast.fire({ icon: "error", title: "Session not selected" });
+          return;
+        }
+        if (!department) {
+          Toast.fire({ icon: "error", title: "Department not selected" });
+          return;
+        }
+        if (!programme) {
+          Toast.fire({ icon: "error", title: "Programme not selected" });
+          return;
+        }
+      }
+      if (specificTarget === "student" && !studentId) {
+        Toast.fire({ icon: "error", title: "Student ID not provided" });
         return;
       }
     }
-
     createInvoice();
-  };
+  }, [feesList, target, specificTarget, targetSession, deptSession, department, programme, studentId, createInvoice]);
+
 
   useEffect(() => {
     if (location.state && location.state.invoiceData) {
-      console.log("Edit Invoice data:", location.state.invoiceData);
       const {
         title,
-        // feesList,
         target,
         sessionOfEntry,
         department,
@@ -228,42 +182,34 @@ export default function EditInvoice() {
       const fetchFeesList = async () => {
         const invoiceItems = await postData(
           baseUrl + "invoices/get_invoice_items_by_id/",
-          {
-            invoiceId: invoice_code,
-          }
+          { invoiceId: invoice_code }
         );
-
         if (invoiceItems) {
           setFeesList(invoiceItems);
+          setTotalInvoiceAmount(
+            invoiceItems.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+          );
         }
       };
-
       fetchFeesList();
       setInvoiceTitle(title);
       setTarget(target !== "specific" ? "General School" : "Specific Target");
-
       if (programme) {
-        const selectedDept = department;
         const departmentData = admissionProgrammes.find(
-          (dept) => dept.department === selectedDept
+          (dept) => dept.department === department
         );
-
-        if (!departmentData || !departmentData.programmes?.length) {
+        if (departmentData && departmentData.programmes?.length) {
+          setProgrammesList(departmentData.programmes);
+        } else {
           setProgrammesList([]);
           setProgramme("");
-          return;
         }
-
-        const programmes = departmentData.programmes;
-        setProgrammesList(programmes);
-
         setSpecificTarget("department");
         setDepartment(department);
         setProgramme(programme);
         setProgrammeCode(programmeCode);
         setDeptSession(sessionOfEntry);
       }
-
       setTargetSession(sessionOfEntry);
       setStudentId(studentId);
     }
@@ -329,22 +275,18 @@ export default function EditInvoice() {
                 size="lg"
                 style={{ background: "#05321e", whiteSpace: "nowrap" }}
                 onClick={() => {
-                  if (feeDescription === "" || feeAmount === "") {
-                    Toast.fire({
-                      icon: "error",
-                      title: "Both fields must be provided",
-                    });
+                  if (!feeDescription || !feeAmount) {
+                    Toast.fire({ icon: "error", title: "Both fields must be provided" });
                     return;
                   }
-
-                  const newValue = {
-                    description: feeDescription,
-                    amount: feeAmount,
-                  };
-                  const updatedRows = [...feesList];
-                  updatedRows.push(newValue);
+                  const updatedRows = [
+                    ...feesList,
+                    { description: feeDescription, amount: feeAmount },
+                  ];
                   setFeesList(updatedRows);
-
+                  setTotalInvoiceAmount(
+                    updatedRows.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+                  );
                   setFeeDescription("");
                   setFeeAmount("");
                 }}
@@ -366,41 +308,44 @@ export default function EditInvoice() {
               </thead>
 
               <tbody>
-                {feesList.map((item, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{item.Description ?? item.description}</td>
-                      <td>₦{item.Fee ?? item.amount}</td>
-                      <td style={{ textAlign: "center" }}>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            height: "100%",
+                {feesList.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.Description ?? item.description}</td>
+                    <td>₦{item.Fee ?? item.amount}</td>
+                    <td style={{ textAlign: "center" }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          height: "100%",
+                        }}
+                      >
+                        <MDBIcon
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updatedRows = feesList.filter((_, i) => i !== index);
+                            setFeesList(updatedRows);
+                            setTotalInvoiceAmount(
+                              updatedRows.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+                            );
                           }}
-                        >
-                          <MDBIcon
-                            onClick={(e) => {
-                              e.stopPropagation();
+                          className="zindex-alert fa-sm"
+                          style={{ cursor: "pointer", color: "black" }}
+                          fas
+                          icon="trash"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
 
-                              const updatedRows = [...feesList];
-                              updatedRows.splice(index, 1);
-                              setFeesList(updatedRows);
-                            }}
-                            className="zindex-alert fa-sm"
-                            style={{
-                              cursor: "pointer",
-                              color: "black",
-                            }}
-                            fas
-                            icon="trash"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                <tr>
+                  <td colSpan={2} className="fw-bold text-end text-size-5">
+                    Total:
+                  </td>
+                  <td> ₦{(parseFloat(totalInvoiceAmount) || 0).toFixed(2)}</td>
+                </tr>
               </tbody>
             </table>
           </MDBCol>
@@ -574,7 +519,9 @@ export default function EditInvoice() {
         </Paper>
       )}
 
-      <div className="cus-button w-25 my-2">Edit Invoice</div>
+      <div className="cus-button w-25 my-2" onClick={handleCreateInvoice} style={{ cursor: "pointer" }}>
+        Edit Invoice
+      </div>
     </div>
   );
 }

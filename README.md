@@ -1,70 +1,100 @@
-# Getting Started with Create React App
+# MCCHST Portal
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the official web portal for the Muslim Community College of Health Sciences and Technology, Funtua. The portal provides online services for students, staff, and administrators, including admissions, registration, invoicing, and more.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- Student registration and profile management
+- Admission notification and downloads
+- Course registration and downloads
+- Invoice generation and payment
+- Admin dashboard for user and finance management
+- Responsive design for desktop and mobile
+- PDF generation and downloads for various forms
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
+```
+.
+├── public/                 # Static files and index.html
+├── src/
+│   ├── components/         # React components (student-portal, admin, home, etc.)
+│   ├── pages/              # Page-level components (e.g., admin/finance)
+│   ├── utils/              # Utility functions (e.g., fetch-file.js)
+│   ├── index.js            # App entry point
+│   └── index.css           # Global styles
+├── build/                  # Production build output
+├── package.json            # Project dependencies and scripts
+├── firebase.json           # Firebase configuration
+└── README.md               # Project documentation
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher recommended)
+- npm
+
+### Installation
+
+1. Clone the repository:
+
+   ```sh
+   git clone https://github.com/your-org/mcchst-portal.git
+   cd mcchst-portal
+   ```
+
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+
+### Running the App
+
+Start the development server:
+
+```sh
+npm start
+```
+
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Building for Production
 
-### `npm test`
+To build the app for production:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```sh
+npm run build
+```
 
-### `npm run build`
+The build output will be in the `build/` directory.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Deployment
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+This project is configured for deployment on Firebase Hosting. See [firebase.json](firebase.json) for details.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Technologies Used
 
-### `npm run eject`
+- React
+- Material UI (MUI)
+- MDB React UI Kit
+- pdf-lib, file-saver (for PDF generation)
+- Axios, superagent (for HTTP requests)
+- SweetAlert2 (for notifications)
+- Firebase Hosting
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Folder Highlights
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- [`src/components/student-portal`](src/components/student-portal): Student dashboard, registration, invoices, etc.
+- [`src/components/admin`](src/components/admin): Admin dashboard, user management, finance, etc.
+- [`src/components/home`](src/components/home): Public-facing home page components.
+- [`src/utils`](src/utils): Utility functions (e.g., [`fetchFile`](src/utils/fetch-file.js)).
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## License
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+This project is proprietary and intended for use by MCCHST and its authorized partners.
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For any issues or contributions, please contact the project maintainers.

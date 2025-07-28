@@ -27,6 +27,7 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import StudentsAffairsTab from "./officers-tabs/students-affairs.js";
 import HODSTab from "./officers-tabs/hods.js";
+import RegistrarTab from "./officers-tabs/registrar.js";
 
 export default function OfficersTab() {
   const navigate = useNavigate();
@@ -59,25 +60,104 @@ export default function OfficersTab() {
     }
   };
 
+  // Define which tabs each role can access
+  const roleAccess = {
+    hod: [0], // HOD can only access HOD tab
+    sao: [1], // Student Affairs Officer can only access SAO tab
+    registrar: [2], // Registrar can only access Registrar tab
+  };
+
+  // Get allowed tabs for current role
+  const allowedTabs = roleAccess[officerRole] || [];
+
   useEffect(() => {
+    // Set initial tab value based on role
     if (!init) {
-      // handleFetchData();
-
-      if (officerRole === "hod") {
-        setValue(0);
-      } else if (officerRole === "sao") {
-        setValue(1);
-      } else if (officerRole === "ao") {
-        setValue(2);
-      } else if (officerRole === "bursar") {
-        setValue(3);
-      } else if (officerRole === "registrar") {
-        setValue(4);
+      switch (officerRole) {
+        case "hod":
+          setValue(0);
+          break;
+        case "sao":
+          setValue(1);
+          break;
+        case "registrar":
+          setValue(2);
+          break;
+        default:
+          Toast.fire({
+            icon: "info",
+            title: "Unauthorized Access",
+            text: "You don't have permission to access this section.",
+          });
       }
+      setInit(true);
     }
-  }, [init]);
+  }, [init, officerRole, navigate]);
 
-  const vals = ["1", "2", "3", "4"];
+  // Only allow switching to permitted tabs
+  const handleChange = (event, newValue) => {
+    if (allowedTabs.includes(newValue)) {
+      setValue(newValue);
+    }
+  };
+
+  // Render only the tabs the user has access to
+  const renderTabs = () => {
+    const tabs = [];
+    if (allowedTabs.includes(0)) {
+      tabs.push(<Tab key="hod" label="HOD" {...a11yProps(0)} />);
+    }
+    if (allowedTabs.includes(1)) {
+      tabs.push(<Tab key="sao" label="Students Affairs" {...a11yProps(1)} />);
+    }
+    if (allowedTabs.includes(2)) {
+      tabs.push(<Tab key="registrar" label="Registrar" {...a11yProps(2)} />);
+    }
+    return tabs;
+  };
+
+  // Render only the panels the user has access to
+  const renderPanels = () => {
+    const panels = [];
+    if (allowedTabs.includes(0)) {
+      panels.push(
+        <TabPanel key="hod" value={value} index={0}>
+          <HODSTab />
+        </TabPanel>
+      );
+    }
+    if (allowedTabs.includes(1)) {
+      panels.push(
+        <TabPanel key="sao" value={value} index={1}>
+          <StudentsAffairsTab />
+        </TabPanel>
+      );
+    }
+    if (allowedTabs.includes(2)) {
+      panels.push(
+        <TabPanel key="registrar" value={value} index={2}>
+          <RegistrarTab />
+        </TabPanel>
+      );
+    }
+    return panels;
+  };
+
+  // If no valid role, show unauthorized message
+  if (!allowedTabs.length) {
+    return (
+      <div className="m-4 d-flex flex-column align-items-center">
+        <Paper sx={{ width: "100%", overflow: "hidden", p: 3 }}>
+          <Typography variant="h5" component="h2">
+            Unauthorized Access
+          </Typography>
+          <Typography>
+            You don't have permission to access this section.
+          </Typography>
+        </Paper>
+      </div>
+    );
+  }
 
   function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -86,15 +166,11 @@ export default function OfficersTab() {
       <div
         role="tabpanel"
         hidden={value !== index}
-        id={`vertical-tabpanel-${index}`}
-        aria-labelledby={`vertical-tab-${index}`}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
         {...other}
       >
-        {value === index && (
-          <Box sx={{ p: 3 }}>
-            <Typography>{children}</Typography>
-          </Box>
-        )}
+        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
       </div>
     );
   }
@@ -107,8 +183,8 @@ export default function OfficersTab() {
 
   function a11yProps(index) {
     return {
-      id: `vertical-tab-${index}`,
-      "aria-controls": `vertical-tabpanel-${index}`,
+      id: `simple-tab-${index}`,
+      "aria-controls": `simple-tabpanel-${index}`,
     };
   }
 
@@ -118,8 +194,18 @@ export default function OfficersTab() {
         <MDBRow>
           <MDBCol>
             <div>
-              {value === 0 && <HODSTab />}
-              {value === 1 && <StudentsAffairsTab />}
+              <Box sx={{ width: "100%" }}>
+                <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+                  <Tabs
+                    value={value}
+                    onChange={handleChange}
+                    aria-label="officers tabs"
+                  >
+                    {renderTabs()}
+                  </Tabs>
+                </Box>
+                {renderPanels()}
+              </Box>
             </div>
           </MDBCol>
         </MDBRow>

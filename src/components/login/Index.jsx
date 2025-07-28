@@ -89,14 +89,7 @@ export const LoginComponent = () => {
   }
 
   const handleLogin = async () => {
-    // {
-    //   state: {
-    //     userData: response.body;
-    //   }
-    // }
-    // navigate("/portal");
-    // return;
-
+   
     const data = {
       applicationId: loginId,
       password: password,
@@ -119,7 +112,7 @@ export const LoginComponent = () => {
             // setting login session
             localStorage.setItem("lastActivityTime", Date.now().toString());
 
-            console.log("Response body:", response.body);
+            // console.log("Response body:", response.body);
 
             const varificationStatus = response.body.eVarified;
             const paymentStatus = response.body.Paid;

@@ -17,7 +17,7 @@ import ProtectedAdminRoute from "./components/admin/ProtectedAdminRoute";
 import FinancialTab from "./components/admin/financeTab";
 import { PayNow } from "./components/payment/pay";
 import { ForgetPasswordComponent } from "./components/forget-password/Index";
-import UsersTab from "./components/admin/users_component";
+import { UsersPage } from "./features/users";
 import SiteAdminTab from "./components/admin/site_admin_component";
 import CreateUserTab from "./components/admin/create_users";
 import ProtectedUrlRoute from "./components/admin/protectedUrlRoute";
@@ -34,7 +34,7 @@ import DepositoryPage from "./components/depository/pages/depository";
 import DepoPreview from "./components/depository/pages/depo-preview";
 import AcceptanceAuthPage from "./components/acceptance-auth";
 import StudentDashboard from "./components/student-portal";
-import OfficersTab from "./components/admin/officers-tab";
+import Officers from "./features/officers/Officers";
 import ListOfApplicantsPage from "./components/admin/pages/list-of-applicants";
 import AdmittedStdTab from "./components/admin/pages/list-of-admitted-std";
 import RegistrationDownloadsCard from "./components/student-portal/registration-downlods";
@@ -48,6 +48,9 @@ import StudentPaymentsDashboard from "./components/student-portal/payments/manag
 import ListOfAdminInvoices from "./components/admin/pages/list-of-invoices";
 import StudentTransactionsList from "./pages/students/payments/transactons/Transactions";
 import EditInvoice from "./pages/admin/finance/EditInvoice";
+import EditUserPage from "./features/users/pages/EditUserPage";
+import CreateUser from "./features/users/components/CreateUser";
+import UpdateCsvUploaded from "./pages/students/registration/data_update/UpdateCsvUploaded";
 
 function App() {
   return (
@@ -103,6 +106,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ValidationComponent />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="csv-update"
+          element={
+            <ProtectedRoute>
+              <UpdateCsvUploaded />
             </ProtectedRoute>
           }
         />
@@ -227,10 +238,19 @@ function App() {
           />
 
           <Route
-            path="edit-invoice" 
+            path="edit-invoice"
             element={
               <ProtectedUrlRoute>
                 <EditInvoice />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="edit-users"
+            element={
+              <ProtectedUrlRoute>
+                <EditUserPage />
               </ProtectedUrlRoute>
             }
           />
@@ -248,7 +268,7 @@ function App() {
             path="users"
             element={
               <ProtectedUrlRoute>
-                <UsersTab />
+                <UsersPage />
               </ProtectedUrlRoute>
             }
           />
@@ -257,7 +277,7 @@ function App() {
             path="officers"
             element={
               <ProtectedUrlRoute>
-                <OfficersTab />
+                <Officers />
               </ProtectedUrlRoute>
             }
           />
@@ -266,7 +286,7 @@ function App() {
             path="create-staff"
             element={
               <ProtectedUrlRoute>
-                <CreateUserTab />
+                <CreateUser />
               </ProtectedUrlRoute>
             }
           />
@@ -293,6 +313,7 @@ function App() {
           <Route path="acc-calender" element={<AcademicCalender />} />
           <Route path="invoice" element={<InvoicePage />} />
           <Route path="invoices" element={<InvoiceList />} />
+
           <Route path="transactions" element={<StudentTransactionsList />} />
           <Route
             path="manage-payments"

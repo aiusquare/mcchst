@@ -550,7 +550,6 @@ const RegistrationDownloadsCard = () => {
               onClick={() => {
                 navigate("/validation");
               }}
-              disabled
             >
               <MDBIcon size="lg" className="me-2" fas icon="pen-to-square" />
               Edit Profile

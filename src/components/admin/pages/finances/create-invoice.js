@@ -43,6 +43,7 @@ export default function CreateInvoice() {
   const [feeDescription, setFeeDescription] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
   const [invoiceTitle, setInvoiceTitle] = useState("");
+  const [totalInvoiceAmount, setTotalInvoiceAmount] = useState(0);
 
   const handleDepartmentChange = (e) => {
     const selectedDept = e.target.value;
@@ -281,6 +282,13 @@ export default function CreateInvoice() {
                   updatedRows.push(newValue);
                   setFeesList(updatedRows);
 
+                  const total = updatedRows.reduce(
+                    (sum, item) => sum + (parseFloat(item.Fee) || 0),
+                    0
+                  );
+
+                  setTotalInvoiceAmount(total);
+
                   setFeeDescription("");
                   setFeeAmount("");
                 }}
@@ -323,6 +331,13 @@ export default function CreateInvoice() {
                               const updatedRows = [...feesList];
                               updatedRows.splice(index, 1);
                               setFeesList(updatedRows);
+
+                              const total = updatedRows.reduce(
+                                (sum, item) =>
+                                  sum + (parseFloat(item.Fee) || 0),
+                                0
+                              );
+                              setTotalInvoiceAmount(total);
                             }}
                             className="zindex-alert fa-sm"
                             style={{
@@ -337,6 +352,13 @@ export default function CreateInvoice() {
                     </tr>
                   );
                 })}
+                <tr>
+                  {/* <td className="fw-bold"></td> */}
+                  <td colSpan={2} className="fw-bold text-end text-size-5">
+                    Total:
+                  </td>
+                  <td> ₦{(parseFloat(totalInvoiceAmount) || 0).toFixed(2)}</td>
+                </tr>
               </tbody>
             </table>
           </MDBCol>

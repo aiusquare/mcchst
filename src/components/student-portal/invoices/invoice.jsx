@@ -153,7 +153,7 @@ const InvoicePage = () => {
             </h4>
             <p style={{ textAlign: "left" }}>
               Created:{" "}
-              <span style={{ color: "blue" }}>{invoiceData?.invoice_date}</span>{" "}
+              <span style={{ color: "blue" }}>{invoiceData?.invoice_date}</span>
               <br />
               Due: <span style={{ color: "red" }}>{invoiceData?.due_date}</span>
             </p>

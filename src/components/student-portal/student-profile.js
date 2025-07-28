@@ -123,7 +123,7 @@ export default function StudentProfile(props) {
 
   return (
     <div>
-      <div
+      {/* <div
         className="bg-image p-2"
         style={{ backgroundColor: "#05321e", color: "white" }}
       >
@@ -134,7 +134,7 @@ export default function StudentProfile(props) {
           targetDate={new Date(Date.now() + 1000 * 60 * 60 * 24 * 7)}
           handleExpire={(expired) => console.log("Expired:", expired)}
         />
-      </div>
+      </div> */}
       <MDBContainer className="py-5">
         <MDBRow>
           <MDBCol>

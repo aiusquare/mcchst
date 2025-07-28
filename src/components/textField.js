@@ -1,4 +1,4 @@
-import { Alert, Collapse, TextField } from "@mui/material";
+import { Alert, Collapse } from "@mui/material";
 import { MDBInput } from "mdb-react-ui-kit";
 import { useState } from "react";
 
@@ -7,7 +7,7 @@ const TextInput = (props) => {
   const [text, setText] = useState("");
 
   return (
-    <div className="mx-4">
+    <div className="">
       <MDBInput
         onChange={(e) => {
           const emailRegex = /\S+@\S+\.\S+/;
@@ -25,6 +25,7 @@ const TextInput = (props) => {
         label={props.tLabel}
         maxLength={props.maxLen}
         value={props.value}
+        className="p-2 m-2"
         required
       />
       {text === "" && <ErrorComp show={validate} />}
