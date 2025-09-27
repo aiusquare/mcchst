@@ -1,4 +1,3 @@
-import React from "react";
 import {
   MDBBtn,
   MDBCard,
@@ -11,7 +10,6 @@ import MenuItem from "@mui/material/MenuItem";
 import { useNavigate } from "react-router-dom";
 import request from "superagent";
 
-import TextInput from "../../../components/textField";
 import SelectionBox from "../../../components/SelectionBox";
 import { loader } from "../../../components/LoadingSpinner";
 import { Toast } from "../../../components/errorNotifier";
@@ -23,17 +21,34 @@ import {
 import { STAFF_STATUSES, ACCESS_MODES } from "../constants";
 import { validateUserForm } from "../utils/validation";
 import { useUserForm } from "../hooks/useUserForm";
+import { baseUrl } from "../../../services/setup";
 
 const CreateUser = (props) => {
   const navigate = useNavigate();
+  const mapUserDataToForm = (userData) => {
+    return {
+      fullname: userData.fullname ?? "",
+      userId: userData.user_id ?? "",
+      phoneNumber: userData.phone_number ?? "",
+      access: userData.access ?? "",
+      accessMode: userData.mode ?? "",
+      userStatus: userData.status ?? "",
+      department: userData.department ?? "",
+      office: userData.office_role ?? "",
+      hasAdminAccess: !!userData.access, // true if user has access
+      isOfficer: userData.access === "officer", // guess based on role
+    };
+  };
+
   const {
     formData,
     handleInputChange,
     handleAccessChange,
     handleAdminAccessToggle,
     handleOfficerToggle,
-  } = useUserForm();
-
+  } = useUserForm(
+    props.mode === "edit" ? mapUserDataToForm(props.userData) : {}
+  );
   console.log("props", props);
 
   const handleUserCreation = async () => {
@@ -47,10 +62,17 @@ const CreateUser = (props) => {
     try {
       loader({ title: "Creating User", text: "please wait..." });
 
-      await request
-        .post("https://api.mcchstfuntua.edu.ng/admin/create_user.php")
-        .type("application/json")
-        .send(formData);
+      if (props.mode !== "edit") {
+        await request
+          .post(baseUrl + "admin/create_user")
+          .type("application/json")
+          .send(formData);
+      } else {
+        await request
+          .post(baseUrl + "admin/edit_user")
+          .type("application/json")
+          .send(formData);
+      }
 
       Toast.fire({
         icon: "success",
@@ -88,28 +110,31 @@ const CreateUser = (props) => {
                 className="center-cmp w-100"
                 variant="outlined"
                 margin="normal"
-                value={props.userData?.fullname ?? formData.fullname}
+                value={formData.fullname}
                 onChange={(e) => handleInputChange("fullname", e.target.value)}
                 required
               />
 
               <TextField
-                label="User ID"
+                label="Staff ID"
                 className="center-cmp w-100"
                 variant="outlined"
                 margin="normal"
-                value={props.userData?.user_id ?? formData.userId}
+                value={formData.userId}
                 onChange={(e) => handleInputChange("userId", e.target.value)}
                 required
+                disabled={props.mode !== "edit" ? false : true}
               />
 
               <TextField
-                label="Email"
+                label="Phone Number"
                 className="center-cmp w-100"
                 variant="outlined"
                 margin="normal"
-                value={props.userData?.email ?? formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
+                value={formData.phoneNumber}
+                onChange={(e) =>
+                  handleInputChange("phoneNumber", e.target.value)
+                }
                 required
               />
 
@@ -117,7 +142,7 @@ const CreateUser = (props) => {
               <SelectionBox
                 label="Status"
                 className="center-cmp"
-                value={props.userData?.status ?? formData.userStatus}
+                value={formData.userStatus}
                 changed={(value) => handleInputChange("userStatus", value)}
                 content={STAFF_STATUSES.map((status) => (
                   <MenuItem key={status.code} value={status.name}>
@@ -129,7 +154,7 @@ const CreateUser = (props) => {
               <SelectionBox
                 label="Department"
                 className="center-cmp"
-                value={props.userData?.department ?? formData.department}
+                value={formData.department}
                 changed={(value) => handleInputChange("department", value)}
                 content={admissionProgrammes.map((dept) => (
                   <MenuItem key={dept.department} value={dept.department}>
@@ -151,7 +176,7 @@ const CreateUser = (props) => {
                   <SelectionBox
                     label="User Access"
                     className="center-cmp"
-                    value={props.userData?.access ?? formData.access}
+                    value={formData.access}
                     changed={handleAccessChange}
                     content={accesses.map((access) => (
                       <MenuItem key={access.code} value={access.code}>
@@ -214,7 +239,7 @@ const CreateUser = (props) => {
                 style={{ background: "#05321e" }}
                 onClick={handleUserCreation}
               >
-                CREATE USER
+                {props.mode === "edit" ? "UPDATE USER" : "CREATE USER"}
               </MDBBtn>
             </MDBCol>
           </MDBRow>

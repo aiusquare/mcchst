@@ -5,8 +5,7 @@ export const validateUserForm = ({
   fullname,
   userId,
   phoneNumber,
-  email,
-  staffStatus,
+  userStatus,
   hasAdminAccess,
   access,
 }) => {
@@ -25,7 +24,7 @@ export const validateUserForm = ({
     return false;
   }
 
-  if (!staffStatus) {
+  if (!userStatus) {
     Toast.fire({ icon: "error", title: "Please select status" });
     return false;
   }
@@ -44,14 +43,14 @@ export const validateUserForm = ({
   }
 
   // Validate email
-  const isValidEmail = VALIDATION_PATTERNS.EMAIL.test(email);
-  if (!isValidEmail) {
-    Toast.fire({
-      icon: "error",
-      title: "Invalid email please check and try again.",
-    });
-    return false;
-  }
+  // const isValidEmail = VALIDATION_PATTERNS.EMAIL.test(email);
+  // if (!isValidEmail) {
+  //   Toast.fire({
+  //     icon: "error",
+  //     title: "Invalid email please check and try again.",
+  //   });
+  //   return false;
+  // }
 
   if (hasAdminAccess && !access) {
     Toast.fire({

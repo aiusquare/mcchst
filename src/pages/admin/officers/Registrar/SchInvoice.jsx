@@ -12,15 +12,15 @@ import {
 import request from "superagent";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { baseUrl } from "../../../services/setup";
+import { baseUrl } from "../../../../services/setup";
 import Swal from "sweetalert2";
-import { Toast } from "../../errorNotifier";
-import { loader } from "../../LoadingSpinner";
-import { postData } from "../../../utils/post-data";
-import { fetchFile } from "../../../utils/fetch-file";
-import { formatCurrency } from "../../../utils/formatCurrency";
+import { Toast } from "../../../../utils/toast";
+import { loader } from "../../../../utils/loading-spinner";
+import { postData } from "../../../../utils/post-data";
+import { fetchFile } from "../../../../utils/fetch-file";
+import { formatCurrency } from "../../../../utils/formatCurrency";
 
-const InvoicePage = () => {
+const SchInvoicePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const userEmail = localStorage.getItem("userEmail");
@@ -51,7 +51,7 @@ const InvoicePage = () => {
             0
           );
 
-          setTotal(total - (parseFloat(incData.waiver) || 0));
+          setTotal(total);
           setInvoiceItems(invoiceItems);
         }
       };
@@ -75,49 +75,6 @@ const InvoicePage = () => {
       fetchBalance();
     }
   }, []);
-
-  const handlePayByWallet = async () => {
-    if (userBalance < total) {
-      Swal.fire(
-        "Insufficient Balance",
-        "You have an insufficient balance, please fund your wallet and continue",
-        "warning"
-      ).then(() => {
-        navigate("/portal/manage-payments");
-      });
-      return;
-    }
-
-    loader({
-      title: "Processing",
-      text: "Please wait while we process your invoice.",
-    });
-
-    try {
-      await request
-        .post(baseUrl + "invoices/clear_invoice_by_wallet/")
-        .type("application/json")
-        .send({
-          email: userEmail,
-          pay_id: invoiceData.pay_id,
-          title: invoiceData.title,
-        });
-
-      Toast.fire({
-        title: "Success!",
-        text: "Invoice paid successfully",
-        icon: "success",
-      });
-
-      navigate("/portal/invoices");
-    } catch (err) {
-      Swal.fire({
-        title: "Payment Failed!",
-        text: err?.message || "An unexpected error occurred",
-        icon: "error",
-      });
-    }
-  };
 
   useEffect(() => {
     // Set the viewport width to 1024 when the component mounts
@@ -197,29 +154,12 @@ const InvoicePage = () => {
             {invoiceItems.map((item, idx) => (
               <tr key={idx}>
                 <td>{item.description}</td>
-                <td>
-                  {formatCurrency((parseFloat(item.amount) || 0).toFixed(2))}
-                </td>
+                <td>{formatCurrency(parseFloat(item.amount) || 0)}</td>
               </tr>
             ))}
-
-            {invoiceData?.waiver && (
-              <tr className="fw-bold">
-                <td className="text-end" style={{ color: "green" }}>
-                  Waiver:
-                </td>
-                <td style={{ color: "green" }}>
-                  -
-                  {formatCurrency(
-                    (parseFloat(invoiceData.waiver) || 0).toFixed(2)
-                  )}
-                </td>
-              </tr>
-            )}
-
             <tr className="fw-bold">
               <td className="text-end">Total:</td>
-              <td>{formatCurrency((parseFloat(total) || 0).toFixed(2))}</td>
+              <td>{formatCurrency(parseFloat(total) || 0)}</td>
             </tr>
           </MDBTableBody>
         </MDBTable>
@@ -246,9 +186,9 @@ const InvoicePage = () => {
 
           {invoiceData?.status !== "Paid" && (
             <>
-              <button onClick={handlePayByWallet} className="btn btn-primary">
+              {/* <button onClick={handlePayByWallet} className="btn btn-primary">
                 Pay Now
-              </button>
+              </button> */}
 
               <button
                 onClick={() => {
@@ -273,4 +213,4 @@ const InvoicePage = () => {
   );
 };
 
-export default InvoicePage;
+export default SchInvoicePage;

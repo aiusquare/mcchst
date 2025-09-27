@@ -33,8 +33,7 @@ export default function AdmittedStdTab() {
           // console.log("FETCH RES: ", response);
           setListOfAdmittedStudents(response.body.list);
         });
-    } catch (err) {
-      // console.log(err);
+    } catch (err) {      // console.log(err);
     }
   };
 
@@ -57,13 +56,13 @@ export default function AdmittedStdTab() {
         <MDBRow style={{ padding: "10px" }}>
           <MDBCol style={{ display: "flex", justifyContent: "center" }}>
             <table>
-              <tr>
+              <tr style={{ textAlign: "left" }}>
                 <th>SN</th>
                 <th>App No.</th>
                 <th>Fullname</th>
-                <th>Department</th>
                 <th>Programme</th>
-                <th>Mode of Entry</th>
+                <th>Phone number</th>
+                <th>Email</th>
                 <th>View</th>
               </tr>
               {listOfAdmittedStudents.map((std, i) => {
@@ -72,9 +71,9 @@ export default function AdmittedStdTab() {
                     <td>{i + 1}</td>
                     <td>{std.ApplicationNo}</td>
                     <td>{std.Fullname}</td>
-                    <td>{std.Department}</td>
                     <td>{std.Programme}</td>
-                    <td>{std.ModeOfEntry}</td>
+                    <td>{std.PhoneNumber}</td>
+                    <td>{std.Email}</td>
                     <td>
                       <MDBIcon
                         size="lg"

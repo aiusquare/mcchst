@@ -45,10 +45,20 @@ export const MobileMenu = () => {
             </div>
 
             <div
-              // onClick={() => {
-              //   navigate("about");
-              //   setShowMenu(false);
-              // }}
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = "https://mcchst-hostels.web.app/login";
+              }}
+              className="menu-bg"
+            >
+              Hostels
+            </div>
+
+            <div
+              onClick={() => {
+                setShowMenu(false);
+                window.location.href = "https://library.mcchstfuntua.edu.ng";
+              }}
               className="menu-bg"
             >
               E-Library

@@ -51,6 +51,10 @@ import EditInvoice from "./pages/admin/finance/EditInvoice";
 import EditUserPage from "./features/users/pages/EditUserPage";
 import CreateUser from "./features/users/components/CreateUser";
 import UpdateCsvUploaded from "./pages/students/registration/data_update/UpdateCsvUploaded";
+import Scholarship from "./pages/admin/officers/Registrar/Scholarship";
+import SchInvoicePage from "./pages/admin/officers/Registrar/SchInvoice";
+import InvoicesReport from "./features/finance/components/InvoicesReport";
+import DocumentRequirements from "./features/officers/components/RegistrarPanel/DocumentRequirements";
 
 function App() {
   return (
@@ -265,6 +269,15 @@ function App() {
           />
 
           <Route
+            path="invoices-report"
+            element={
+              <ProtectedUrlRoute>
+                <InvoicesReport />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
             path="users"
             element={
               <ProtectedUrlRoute>
@@ -278,6 +291,33 @@ function App() {
             element={
               <ProtectedUrlRoute>
                 <Officers />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="scholarship"
+            element={
+              <ProtectedUrlRoute>
+                <Scholarship />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="registration-docs"
+            element={
+              <ProtectedUrlRoute>
+                <DocumentRequirements />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="view-invoice"
+            element={
+              <ProtectedUrlRoute>
+                <SchInvoicePage />
               </ProtectedUrlRoute>
             }
           />

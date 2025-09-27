@@ -41,6 +41,18 @@ const AdmissionNumberTab = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [hasMatricNumber, setHasMatricNumber] = useState(false);
+  const [documents, setDocuments] = useState([]);
+  const [documentsSubmitted, setDocumentsSubmitted] = useState([]);
+  const [documentsFetched, setDocumentsFetched] = useState(false);
+  const [canGenerateMatric, setCanGenerateMatric] = useState(false);
+  const [totalNonDeferrable, setTotalNonDeferrable] = useState(0);
+  const [submittedCount, setSubmittedCount] = useState(0);
+
+  useEffect(() => {
+    if (user?.ApplicationNo && !documentsFetched) {
+      fetchDocuments(user.ApplicationNo);
+    }
+  }, [user, documentsFetched]);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -84,6 +96,75 @@ const AdmissionNumberTab = () => {
     }
   };
 
+  const fetchDocuments = async () => {
+    try {
+      const docsResponse = await request.get(
+        `${baseUrl}/officers/get_required_docs`
+      );
+      const requiredDocs = docsResponse.body.data;
+
+      let totalNonDef = requiredDocs.filter(
+        (doc) => doc.deferrable === "0"
+      ).length;
+      setTotalNonDeferrable(totalNonDef);
+
+      setDocuments(requiredDocs);
+      setDocumentsFetched(true);
+    } catch (error) {
+      Toast.fire({
+        icon: "error",
+        title: "Failed to fetch documents",
+      });
+    }
+  };
+
+  const handleDocumentToggle = async (doc, isDeferrable, isSubmitted) => {
+    console.log(
+      "Doc:",
+      doc,
+      "Deferrable:",
+      isDeferrable,
+      "Submitted:",
+      isSubmitted
+    );
+
+    if (isDeferrable === "0") {
+      setSubmittedCount((prev) => {
+        const newValue = prev + (isSubmitted ? 1 : -1);
+        return Math.max(newValue, 0);
+      });
+    }
+
+    if (isSubmitted) {
+      const docObj = {
+        doc_name: doc.doc_name,
+        user_id: user.Email,
+        deferrable: doc.deferrable,
+      };
+
+      setDocumentsSubmitted((prev) => {
+        const withoutThisDoc = prev.filter((d) => d.doc_name !== doc.doc_name);
+        return [...withoutThisDoc, docObj];
+      });
+    } else {
+      setDocumentsSubmitted((prev) =>
+        prev.filter((d) => d.doc_name !== doc.doc_name)
+      );
+    }
+  };
+
+  useEffect(() => {
+    let percentageSubmitted = (submittedCount / totalNonDeferrable) * 100;
+    console.log(
+      `Submitted ${submittedCount} of ${totalNonDeferrable} non-deferrable documents (${percentageSubmitted}%)`
+    );
+    if (percentageSubmitted >= 100 && totalNonDeferrable > 0) {
+      setCanGenerateMatric(true);
+    } else {
+      setCanGenerateMatric(false);
+    }
+  }, [submittedCount, totalNonDeferrable]);
+
   const handleSubmitVerification = async () => {
     if (!user) return;
 
@@ -94,6 +175,13 @@ const AdmissionNumberTab = () => {
     try {
       if (!isVerified) {
         setError("Please check the verification box");
+        return;
+      }
+
+      if (!canGenerateMatric) {
+        setError(
+          "All required (non-deferrable) documents must be submitted before generating matriculation number"
+        );
         return;
       }
 
@@ -113,6 +201,7 @@ const AdmissionNumberTab = () => {
         programme_code: admissionCode,
         entry_session: user.SessionOfEntry,
         application_no: user.ApplicationNo,
+        documents_submitted: documentsSubmitted,
       };
 
       const retData = await postData(
@@ -198,6 +287,17 @@ const AdmissionNumberTab = () => {
                   <td>{user.MatricNumber}</td>
                 </tr>
                 <tr>
+                  <th scope="row">Account Balance</th>
+                  <td>
+                    <strong>
+                      {new Intl.NumberFormat("en-NG", {
+                        style: "currency",
+                        currency: "NGN",
+                      }).format(user.AccountBalance || 0)}
+                    </strong>
+                  </td>
+                </tr>
+                <tr>
                   <th scope="row" style={{ width: "150px" }}>
                     Fullname
                   </th>
@@ -223,6 +323,62 @@ const AdmissionNumberTab = () => {
             </table>
           </div>
 
+          {/* Document Requirements Section */}
+          <div className="mt-4 mb-4">
+            <h5 className="fw-semibold mb-3">Required Documents</h5>
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm">
+                <thead>
+                  <tr>
+                    <th>Document</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {documents.map((doc, i) => (
+                    <tr key={i}>
+                      <td>{doc.doc_name}</td>
+                      <td>
+                        <span
+                          className={`badge ${
+                            doc?.deferrable === "1"
+                              ? "bg-success"
+                              : "bg-warning"
+                          }`}
+                        >
+                          {doc?.deferrable === "1"
+                            ? "Deferrable"
+                            : "Non Defferrable"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="form-check">
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={doc.isSubmitted}
+                            onChange={(e) =>
+                              handleDocumentToggle(
+                                doc,
+                                doc.deferrable,
+                                e.target.checked
+                              )
+                            }
+                          />
+                          <label className="form-check-label">
+                            Mark as{" "}
+                            {doc.isSubmitted ? "not submitted" : "submitted"}
+                          </label>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <div>
             <input
               className="form-check-input mb-2"
@@ -231,14 +387,18 @@ const AdmissionNumberTab = () => {
               checked={isVerified}
               onChange={(e) => setIsVerified(e.target.checked)}
             />
-            I Confirm/Verify that this candidate meets all requirements for
-            Registration.
+            <label className="form-check-label ms-2">
+              I Confirm/Verify that this candidate meets all requirements for
+              Registration.
+            </label>
           </div>
 
           <button
-            className="btn btn-success"
+            className="btn btn-success mt-3"
             onClick={handleSubmitVerification}
-            disabled={loading || hasMatricNumber}
+            disabled={
+              loading || hasMatricNumber || !(isVerified && canGenerateMatric)
+            }
           >
             {loading ? (
               <div
@@ -249,6 +409,14 @@ const AdmissionNumberTab = () => {
               "Generate Admission Number"
             )}
           </button>
+          {!canGenerateMatric && documentsFetched && (
+            <div className="text-danger mt-2">
+              <small>
+                All required documents must be submitted before generating
+                matriculation number
+              </small>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -276,7 +444,7 @@ const ClearanceTab = () => {
         )
         .type("application/json")
         .then((response) => {
-          console.log("FETCH RES: ", response.body);
+          // console.log("FETCH RES: ", response.body);
           setRows(response.body);
           setIsReady(true);
         });

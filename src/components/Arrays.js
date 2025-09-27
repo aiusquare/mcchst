@@ -52,7 +52,7 @@ export const accessRules = {
     "/admin/create-invoice",
     "/admin/raised-invoices",
   ],
-  officer: ["/admin/officers"],
+  officer: ["/admin/officers", "/admin/scholarship", "/admin/view-invoice"],
   users: ["/admin/users", "/admin/create-staff"],
   siteAdmin: [
     "/admin",
@@ -313,6 +313,7 @@ export const entryMode = [
   { name: "Fresh", code: "fresh" },
   { name: "Retrainee", code: "retrainee" },
   { name: "Transfer", code: "transfer" },
+  { name: "Abridgment", code: "abridgment" },
 ];
 
 export const sessionOfEntry = [

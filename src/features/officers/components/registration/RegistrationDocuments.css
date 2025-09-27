@@ -1,0 +1,51 @@
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.badge {
+  padding: 0.5em 0.75em;
+  font-weight: 500;
+}
+
+/* Highlight required documents */
+.table-warning td {
+  background-color: rgba(255, 243, 205, 0.4);
+}
+
+.form-check-input {
+  width: 1.2em;
+  height: 1.2em;
+  margin-top: 0.25em;
+  cursor: pointer;
+}
+
+.form-check-input:checked {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.alert {
+  border-left: 4px solid #ffc107;
+}
+
+/* Animation for status changes */
+.badge {
+  transition: all 0.3s ease;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .table-responsive {
+    margin: 0;
+  }
+
+  .card-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

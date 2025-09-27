@@ -7,7 +7,6 @@ import moon from "../../pictures/half_moon.png";
 import settingsIcon from "../../pictures/settings.png";
 import dashboardIco from "../../pictures/dashboard.png";
 import logo from "../../pictures/logo.png";
-import { Toast } from "../errorNotifier";
 
 import {
   Sidebar,
@@ -127,6 +126,15 @@ const SideNavBar = () => {
             <MenuItem
               style={{ textAlign: "left" }}
               onClick={() => {
+                handleAccess("invoices-report");
+              }}
+              icon={<i class="bi bi-dot"></i>}
+            >
+              Invoices Report
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
                 handleAccess("create-invoice");
               }}
             >
@@ -153,15 +161,97 @@ const SideNavBar = () => {
             Users
           </MenuItem>
 
-          <MenuItem
-            style={{ textAlign: "left" }}
-            onClick={() => {
-              handleAccess("officers");
-            }}
+          <SubMenu
             icon={<BarIcons img={usersIcon} />}
+            label="Officers"
+            style={{ textAlign: "left" }}
           >
-            Officers
-          </MenuItem>
+            {localStorage.getItem("officeRole") === "hod" && (
+              <>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("hod");
+                  }}
+                >
+                  Admission confirmation
+                </MenuItem>
+
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("hod");
+                  }}
+                >
+                  Clearance
+                </MenuItem>
+              </>
+            )}
+            {localStorage.getItem("officeRole") === "sao" && (
+              <>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("sao");
+                  }}
+                >
+                  Admission
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("sao");
+                  }}
+                >
+                  Clearance
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("sao");
+                  }}
+                >
+                  Reports
+                </MenuItem>
+              </>
+            )}
+            {localStorage.getItem("officeRole") === "registerer" && (
+              <>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("scholarship");
+                  }}
+                >
+                  Scholarship
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("registerer");
+                  }}
+                >
+                  Clearance
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("hod");
+                  }}
+                >
+                  Reports
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("registration-docs");
+                  }}
+                >
+                  Registration Documents
+                </MenuItem>
+              </>
+            )}
+          </SubMenu>
 
           <MenuItem
             style={{ textAlign: "left" }}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import request from "superagent";
 import editIcon from "../../../pictures/edit.png";
@@ -11,8 +11,6 @@ const UsersTable = () => {
   const [filteredRows, setFilteredRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [init, setInit] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (!init) {
@@ -90,7 +88,7 @@ const UsersTable = () => {
       {/* Statistics Cards */}
       <div className="row mb-4">
         <div className="col-md-4">
-          <div className="stats-card">
+          <div className="stats-card shadow-1">
             <div className="stat-value">{userStats.totalUsers}</div>
             <div className="stat-label">Total Users</div>
           </div>

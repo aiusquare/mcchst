@@ -44,7 +44,14 @@ const StudentPaymentsDashboard = () => {
           return sum;
         }, 0);
 
-        setOutstanding(total);
+        const totalWaiver = response.body.reduce((sum, item) => {
+          if (item.status === "Unpaid") {
+            return sum + (parseFloat(item.waiver) || 0);
+          }
+          return sum;
+        }, 0);
+
+        setOutstanding(total - totalWaiver);
       })
       .catch((err) => {
         // let errorText = err.response.text;

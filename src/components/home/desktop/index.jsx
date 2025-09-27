@@ -34,9 +34,16 @@ export const HomeDesktop = () => {
         <div className="menu-bar">
           <MenuButton label="Apply Now" navigateTo={"apply"} />
           <MenuButton label="Login" navigateTo={"login"} />
-          <MenuButton label="E-Library" navigateTo={""} />
+          <MenuButton
+            label="Hostels"
+            navigateTo={"https://mcchst-hostels.web.app/login"}
+          />
+          <MenuButton
+            label="E-Library"
+            navigateTo={"https://library.mcchstfuntua.edu.ng"}
+          />
           <MenuButton label="Our History" navigateTo={"about"} />
-          <MenuButton label="Support" navigateTo={"contact"} />
+          {/* <MenuButton label="Support" navigateTo={"contact"} /> */}
         </div>
 
         <div className="frame-2">

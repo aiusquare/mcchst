@@ -1,11 +1,9 @@
-import { useState } from "react";
-import { Toast } from "../../../components/errorNotifier";
+import { useEffect, useState } from "react";
 
 export const useUserForm = (initialValues = {}) => {
   const [formData, setFormData] = useState({
     fullname: "",
     userId: "",
-    email: "",
     phoneNumber: "",
     access: "",
     accessMode: "readOnly",
@@ -16,6 +14,15 @@ export const useUserForm = (initialValues = {}) => {
     department: "",
     ...initialValues,
   });
+
+  useEffect(() => {
+    if (Object.keys(initialValues).length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        ...initialValues,
+      }));
+    }
+  }, []); // ✅ Only run once, on first mount
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({

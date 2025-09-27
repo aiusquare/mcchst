@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Paper, Box, Tabs, Tab, Typography } from "@mui/material";
 import { MDBRow, MDBCol } from "mdb-react-ui-kit";
@@ -11,7 +11,7 @@ import TabPanel from "./components/TabPanel";
 const OFFICER_ROLES = {
   HOD: "hod",
   SAO: "sao",
-  REGISTRAR: "registrar",
+  REGISTRAR: "registerer",
 };
 
 const ROLE_ACCESS = {
@@ -27,6 +27,9 @@ const Officers = () => {
 
   const officerRole = localStorage.getItem("officeRole");
   const allowedTabs = ROLE_ACCESS[officerRole] || [];
+
+  console.log("Officer Role:", officerRole);
+  console.log("Allowed Tabs:", allowedTabs);
 
   useEffect(() => {
     if (!isInitialized) {
