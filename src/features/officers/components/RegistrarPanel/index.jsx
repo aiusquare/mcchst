@@ -10,6 +10,7 @@ import {
   MDBTableBody,
   MDBBtn,
 } from "mdb-react-ui-kit";
+import { useNavigate } from "react-router-dom";
 import TabPanel from "../TabPanel";
 
 const RegistrarDashboard = () => (
@@ -122,6 +123,27 @@ const DocumentManagement = () => (
   </MDBCard>
 );
 
+const ExitCardListTab = () => {
+  const navigate = useNavigate();
+
+  return (
+    <MDBCard>
+      <MDBCardBody>
+        <MDBCardTitle>Hostel Exit Card List</MDBCardTitle>
+        <MDBCardText>
+          View and download exit card list for hostel students
+        </MDBCardText>
+        <MDBBtn
+          color="primary"
+          onClick={() => navigate("/admin/exit-card-list")}
+        >
+          View Exit Card List
+        </MDBBtn>
+      </MDBCardBody>
+    </MDBCard>
+  );
+};
+
 const RegistrarPanel = () => {
   const [activeTab, setActiveTab] = useState(0);
 
@@ -142,6 +164,7 @@ const RegistrarPanel = () => {
           <Tab label="Transcripts" />
           <Tab label="Graduation" />
           <Tab label="Documents" />
+          <Tab label="Exit Card" />
         </Tabs>
       </Box>
 
@@ -159,6 +182,9 @@ const RegistrarPanel = () => {
       </TabPanel>
       <TabPanel value={activeTab} index={4}>
         <DocumentManagement />
+      </TabPanel>
+      <TabPanel value={activeTab} index={5}>
+        <ExitCardListTab />
       </TabPanel>
     </div>
   );

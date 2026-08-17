@@ -55,7 +55,7 @@ export default function ApplicationComponent() {
   const handleDataFetch = async () => {
     try {
       const basicResponse = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/application.php"
+        "https://api.mcchstfuntua.edu.ng/admin/application.php",
       );
       const basicDetails = basicResponse.body.details;
 
@@ -70,12 +70,12 @@ export default function ApplicationComponent() {
       setNoteToApplicant(basicDetails.NoteToApplicant);
 
       const coursesResponse = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer.php"
+        "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer.php",
       );
       setRows(coursesResponse.body);
 
       const applResponse = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/get_applicants.php"
+        "https://api.mcchstfuntua.edu.ng/admin/get_applicants.php",
       );
 
       const regApplicantsList = applResponse.body?.application || [];
@@ -131,7 +131,7 @@ export default function ApplicationComponent() {
     if (navigator.onLine) {
       await request
         .get(
-          "https://api.mcchstfuntua.edu.ng/admin/application/manager/index.php"
+          "https://api.mcchstfuntua.edu.ng/admin/application/manager/index.php",
         )
         .then((applResponse) => {
           const regApplicantsList = applResponse.body || [];
@@ -203,69 +203,92 @@ export default function ApplicationComponent() {
   };
 
   const handleCBTDownloadExcel = async () => {
-    loader({ title: "Downloading", text: "please wait..." });
+    loader({
+      title: "Downloading",
+      text: "Please wait...",
+    });
 
-    if (navigator.onLine) {
-      await request
-        .get("https://api.mcchstfuntua.edu.ng/admin/application/cbt/index.php")
-        .then((cbtResponse) => {
-          let constrCBTDataArray = cbtResponse.body.map((e, i) => ({
-            SNO: i + 1,
-            "Serial No.": e.ApplicationId,
-            Fullname: `${e.FirstName} ${e.Surname} ${e.OtherName}`,
-            Gender: e.Gender,
-            "State of Origin": e.State,
-            "LGA of Origin": e.LGA,
-            Email: e.Email,
-            "Phone number": e.PhoneNumber,
-            "Mode of Entry": "Fresh",
-            "First Choice": e.FirstChoiceProgramme || "",
-            "Second Choice": e.SecondChoiceProgramme || "",
-            OLevel1: e.Scores,
-            OLevel2: e.Scores,
-          }));
-
-          console.log("THE CBT RESPONCE", constrCBTDataArray);
-
-          const cbtHeader = [
-            "SNO",
-            "Serial No.",
-            "Fullname",
-            "Gender",
-            "State of Origin",
-            "LGA of Origin",
-            "Email",
-            "Phone number",
-            "Mode of Entry",
-            "First Choice",
-            "Second Choice",
-            "OLevel1",
-            "OLevel2",
-          ];
-
-          downloadExcel({
-            fileName: "CBT data",
-            sheet: "CBT data",
-            tablePayload: {
-              header: cbtHeader,
-              body: constrCBTDataArray,
-            },
-          });
-          Toast.fire({
-            icon: "success",
-            title: "Downloaded successfully",
-          });
-        })
-        .catch((err) => {
-          Toast.fire({
-            icon: "error",
-            title: "Something went wrong please try again or contact admin.",
-          });
-        });
-    } else {
+    if (!navigator.onLine) {
       Toast.fire({
         icon: "error",
         title: "No internet connection",
+      });
+      return;
+    }
+
+    try {
+      const cbtResponse = await request.get(
+        "https://api.mcchstfuntua.edu.ng/admin/application/cbt/index.php",
+      );
+
+      const rows = cbtResponse.body.data || [];
+
+      const constrCBTDataArray = rows.map((e, i) => ({
+        SNO: i + 1,
+        "Serial No.": e.ApplicationId || "",
+        Fullname:
+          `${e.FirstName || ""} ${e.Surname || ""} ${e.OtherName || ""}`.trim(),
+        Gender: e.Gender || "",
+        "State of Origin": e.State || "",
+        "LGA of Origin": e.LGA || "",
+        "Date of Birth": e.DoB || "",
+        Email: e.Email || "",
+
+        // Preserve leading zeros in Excel
+        "Phone number": `="${e.PhoneNumber || ""}"`,
+
+        "Matric Number": e.MatricNumber || "",
+        Department: e.Department || "",
+        Programme: e.Programme || "",
+
+        "Mode of Entry": "Fresh",
+
+        "First Choice": e.FirstChoiceProgramme || "",
+        "Second Choice": e.SecondChoiceProgramme || "",
+
+        OLevel1: e.Scores || "",
+        OLevel2: e.Scores || "",
+      }));
+
+      const cbtHeader = [
+        "SNO",
+        "Serial No.",
+        "Fullname",
+        "Gender",
+        "State of Origin",
+        "LGA of Origin",
+        "Date of Birth",
+        "Email",
+        "Phone number",
+        "Matric Number",
+        "Department",
+        "Programme",
+        "Mode of Entry",
+        "First Choice",
+        "Second Choice",
+        "OLevel1",
+        "OLevel2",
+      ];
+
+      downloadExcel({
+        fileName: `CBT_Data_${new Date().toISOString().split("T")[0]}`,
+        sheet: "CBT Data",
+        tablePayload: {
+          header: cbtHeader,
+          body: constrCBTDataArray,
+        },
+      });
+
+      Toast.fire({
+        icon: "success",
+        title: `Downloaded ${rows.length} records successfully`,
+      });
+    } catch (err) {
+      console.error("Download Error:", err);
+
+      Toast.fire({
+        icon: "error",
+        title: "Failed to download data. Please try again.",
       });
     }
   };
@@ -432,7 +455,7 @@ const CoursesOnOffer = ({ programmes, entryMode, sessionOfEntry }) => {
   const handleDataFetch = async () => {
     try {
       const coursesResponse = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer.php"
+        "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer.php",
       );
       setRows(coursesResponse.body || []);
     } catch (err) {
@@ -454,7 +477,7 @@ const CoursesOnOffer = ({ programmes, entryMode, sessionOfEntry }) => {
       try {
         await request
           .post(
-            "https://api.mcchstfuntua.edu.ng/admin/save_courses_on_offer.php"
+            "https://api.mcchstfuntua.edu.ng/admin/save_courses_on_offer.php",
           )
           .type("application/json")
           .send(rows);

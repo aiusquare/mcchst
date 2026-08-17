@@ -1,45 +1,25 @@
-import React, { Component, useRef } from "react";
-import Modal from "reboron/DropModal";
-import { MDBInput, MDBBtn, MDBCard } from "mdb-react-ui-kit";
-import { BallTriangle } from "react-loader-spinner";
+// Simple placeholder spinner and loader helper without external deps
+import React from "react";
+import Swal from "sweetalert2";
 
-const LoadingSpinner = () => {
-  const refModal = useRef(null);
-
-  const showModal = () => {
-    refModal.current.show();
-  };
-
-  const hideModal = () => {
-    refModal.current.hide();
-  };
-
-  return (
-    <div style={{ padding: "20px" }}>
-      <button onClick={() => showModal()}>Open</button>
-      <Modal
-        ref={refModal}
-        closeOnClick={false}
-        backdropStyle={{
-          backgroundColor: "ash",
-        }}
-        keyboard={() => this.callback()}
-      >
-        <div style={{ margin: "50px", alignContent: "center" }}>
-          <BallTriangle
-            height={100}
-            width={100}
-            radius={5}
-            color="#4fa94d"
-            ariaLabel="ball-triangle-loading"
-            wrapperClass={{}}
-            wrapperStyle=""
-            visible={true}
-          />
-        </div>
-      </Modal>
-    </div>
-  );
+export const loader = ({ title = "Loading", text = "Please wait..." } = {}) => {
+  Swal.fire({
+    title,
+    text,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    didOpen: () => Swal.showLoading(),
+  });
 };
+
+const LoadingSpinner = () => (
+  <div className="d-flex align-items-center justify-content-center p-4">
+    <div
+      className="spinner-border text-primary"
+      role="status"
+      aria-label="loading"
+    />
+  </div>
+);
 
 export default LoadingSpinner;

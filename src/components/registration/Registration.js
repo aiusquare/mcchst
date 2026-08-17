@@ -30,6 +30,10 @@ import { loader } from "../LoadingSpinner.js";
 import axios from "axios";
 import DateInput from "../DateInput.js";
 import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { baseUrl } from "../../services/setup";
+
+dayjs.extend(customParseFormat);
 
 function Registration(props) {
   const location = useLocation();
@@ -81,11 +85,84 @@ function Registration(props) {
   const [SSCE_Score, setSSCEScore] = useState("9");
   const [SSCE_Sittings, setSSCESittings] = useState("1");
   const [hasJamb, setHasJamb] = useState(false);
+  const [jambFromWaiver, setJambFromWaiver] = useState(false);
   const [isAwaitingResult, setIsAwaitingResult] = useState(false);
   const [applicantId, setApplicantId] = useState("");
   const [modeOfEntry, setModeOfEntry] = useState("Fresh");
-  const [entrySession, setEntrySession] = useState("2025/2026");
+  const [entrySession, setEntrySession] = useState("");
+  const [activeSessionLoading, setActiveSessionLoading] = useState(true);
+  const [ninGateChecked, setNinGateChecked] = useState(false);
   const refNav = React.createRef();
+  const [ninVerified, setNinVerified] = useState(false);
+
+  const applyNinData = (data) => {
+    const toTitleCase = (str) =>
+      str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : "";
+    const firstNonEmpty = (...values) =>
+      values.find((value) => typeof value === "string" && value.trim()) || "";
+    const normalizeDate = (value) => {
+      if (!value) return "";
+
+      const parsedDate = dayjs(
+        value,
+        ["YYYY-MM-DD", "DD-MM-YYYY", "DD/MM/YYYY"],
+        true,
+      );
+      return parsedDate.isValid() ? parsedDate.format("DD/MM/YYYY") : value;
+    };
+
+    setFirstName(toTitleCase(data.firstname));
+    setSurname(toTitleCase(data.lastname));
+    setOtherName(toTitleCase(data.middlename));
+
+    if (data.gender) {
+      const normalizedGender = data.gender.toLowerCase();
+      setGender(
+        normalizedGender === "m" || normalizedGender === "male"
+          ? "Male"
+          : "Female",
+      );
+    }
+    if (data.birthdate) {
+      setDateValue(normalizeDate(data.birthdate));
+    }
+    if (data.residence) {
+      const ninAddress = firstNonEmpty(
+        data.residence.address1,
+        data.residence.address,
+        data.residence.address2,
+        data.address,
+        [data.residence.lga, data.residence.state].filter(Boolean).join(", "),
+      );
+
+      if (ninAddress) {
+        setAddress(ninAddress);
+      }
+      if (data.residence.state) {
+        const ninState = data.residence.state.toLowerCase();
+        const matchedState = nigeria.find(
+          (s) =>
+            s.states.name.toLowerCase().includes(ninState) ||
+            ninState.includes(s.states.name.toLowerCase()),
+        );
+        if (matchedState) {
+          setSelState(matchedState.states.name);
+          setLgas([...matchedState.states.locals]);
+          if (data.residence.lga) {
+            const ninLga = data.residence.lga.toLowerCase();
+            const matchedLga = matchedState.states.locals.find(
+              (l) =>
+                l.name.toLowerCase().includes(ninLga) ||
+                ninLga.includes(l.name.toLowerCase()),
+            );
+            setSelLGA(
+              matchedLga ? matchedLga.name : matchedState.states.locals[0].name,
+            );
+          }
+        }
+      }
+    }
+  };
 
   const handleSubmit = async () => {
     const basicDetails = {
@@ -277,6 +354,24 @@ function Registration(props) {
     });
   };
 
+  // Fetch the currently active/open session from the server
+  useEffect(() => {
+    const fetchActiveSession = async () => {
+      try {
+        const sessionRes = await axios.get(`${baseUrl}session/active`);
+        if (sessionRes.data && sessionRes.data.status && sessionRes.data.data) {
+          setEntrySession(sessionRes.data.data.name);
+        }
+      } catch (error) {
+        // Could not fetch active session
+      } finally {
+        setActiveSessionLoading(false);
+      }
+    };
+
+    fetchActiveSession();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -290,11 +385,52 @@ function Registration(props) {
             setEmail(userData.Email);
             setPhoneNumber(userData.PhoneNumber);
             setApplicantId(userData?.ApplicationId);
+
+            // Restore persisted NIN verification if it already happened
+            try {
+              const ninRes = await axios.get(
+                `${baseUrl}nin_verification/get/${encodeURIComponent(userData?.Email)}`,
+              );
+              if (
+                ninRes.data.status &&
+                !ninRes.data.is_pending &&
+                ninRes.data.nin_data?.firstname
+              ) {
+                applyNinData(ninRes.data.nin_data);
+                setNinVerified(true);
+                setNinGateChecked(true);
+              } else {
+                navigate("/registration/nin-verification", {
+                  state: {
+                    ...location.state,
+                    userData,
+                  },
+                });
+                return;
+              }
+            } catch (ninError) {
+              navigate("/registration/nin-verification", {
+                state: {
+                  ...location.state,
+                  userData,
+                },
+              });
+              return;
+            }
+          }
+
+          // Pre-fill JAMB fields if fee was waived with JAMB details
+          if (location.state.jambData) {
+            const { jambNumber: jn, jambScore: js } = location.state.jambData;
+            setJambNumber(jn);
+            setJambScore(js);
+            setHasJamb(true);
+            setJambFromWaiver(true);
           }
 
           try {
             const response = await axios.get(
-              "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer_json.php"
+              "https://api.mcchstfuntua.edu.ng/admin/courses_on_offer_json.php",
             );
 
             const retProgrammes = response.data;
@@ -362,6 +498,27 @@ function Registration(props) {
     </MenuItem>
   ));
 
+  if (!ninGateChecked) {
+    return (
+      <MDBContainer className="d-flex flex-column align-items-center justify-content-center">
+        <img
+          className="logo"
+          alt="logo"
+          src={logo}
+          onClick={() => {
+            navigate("/");
+          }}
+        />
+        <Card sx={{ maxWidth: 500 }} className="p-4 w-100 mt-3">
+          <div className="reg-captions">Please wait</div>
+          <div style={{ color: "#555", fontSize: "14px" }}>
+            Checking your NIN verification status...
+          </div>
+        </Card>
+      </MDBContainer>
+    );
+  }
+
   return (
     <div>
       <MDBContainer className="d-flex flex-column align-items-center justify-content-center">
@@ -385,9 +542,16 @@ function Registration(props) {
                     color: "#05321e",
                   }}
                 >
-                  <h1>Application Form 2025</h1>
+                  <h1>Application Form 2026</h1>
                 </div>
               </div>
+              <div
+                className="nin-verified-label"
+                style={{ marginBottom: "8px" }}
+              >
+                ✓ NIN already verified.
+              </div>
+
               <div className="reg-captions">Basic Info</div>
 
               <TextField
@@ -397,6 +561,7 @@ function Registration(props) {
                 margin="normal"
                 value={firstName}
                 onChange={() => {}}
+                InputProps={{ readOnly: ninVerified }}
                 required
               />
               <TextField
@@ -406,6 +571,7 @@ function Registration(props) {
                 variant="outlined"
                 margin="normal"
                 onChange={() => {}}
+                InputProps={{ readOnly: ninVerified }}
                 required
               />
 
@@ -416,6 +582,7 @@ function Registration(props) {
                 variant="outlined"
                 margin="normal"
                 onChange={() => {}}
+                InputProps={{ readOnly: ninVerified }}
               />
 
               <TextField
@@ -443,6 +610,10 @@ function Registration(props) {
                 className="center-cmp w-100"
                 variant="outlined"
                 margin="normal"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                }}
                 onBlur={(e) => {
                   setAddress(stringFormatter(e));
                 }}
@@ -492,6 +663,7 @@ function Registration(props) {
                     <Select
                       value={gender}
                       label="Gender"
+                      disabled={ninVerified}
                       onChange={(e) => {
                         setGender(e.target.value);
                       }}
@@ -522,6 +694,7 @@ function Registration(props) {
                 <DateInput
                   label="Date of Birth"
                   value={dateValue}
+                  disabled={ninVerified}
                   handleValue={(e) => {
                     // Format the date to "DD/MM/YYYY"
                     const formattedDate = dayjs(e).format("DD/MM/YYYY");
@@ -534,502 +707,539 @@ function Registration(props) {
             </Card>
           </MDBCol>
         </MDBRow>
-        <MDBRow className="mb-4 w-100">
-          <MDBCol
-            md={12}
-            className="d-flex flex-column align-items-center justify-content-center"
-          >
-            <Card sx={{ maxWidth: 500 }} className="p-2 w-100">
-              {/* <div className="reg-captions">Course Details</div> */}
 
-              <FormGroup>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    textAlign: "left",
-                    color: "green",
-                    fontWeight: 600,
-                    marginLeft: "20px",
-                  }}
-                >
-                  Check I don't have JAMB box, if it is not yet ready.
-                  <br />
-                  <FormControlLabel
-                    control={<input className="reg-radio" type="checkbox" />}
-                    label="I don't have JAMB"
-                    checked={hasJamb}
-                    onChange={() => {
-                      if (hasJamb) {
-                        setHasJamb(false);
-                      } else {
-                        setHasJamb(true);
-                      }
+        <div>
+          <MDBRow className="mb-4 w-100">
+            <MDBCol
+              md={12}
+              className="d-flex flex-column align-items-center justify-content-center"
+            >
+              <Card sx={{ maxWidth: 500 }} className="p-2 w-100">
+                {/* <div className="reg-captions">Course Details</div> */}
+
+                <FormGroup>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      textAlign: "left",
+                      color: "green",
+                      fontWeight: 600,
+                      marginLeft: "20px",
                     }}
-                  />
-                </div>
-              </FormGroup>
-
-              {hasJamb && (
-                <div>
-                  <TextField
-                    style={{ width: "90%" }}
-                    label="Your JAMB Number"
-                    variant="outlined"
-                    margin="normal"
-                    onBlur={(e) => {
-                      setJambNumber(e.target.value);
-                    }}
-                    // required
-                  />
-
-                  <TextField
-                    style={{ width: "90%" }}
-                    label="Your JAMB Score"
-                    variant="outlined"
-                    margin="normal"
-                    onBlur={(e) => {
-                      setJambScore(e.target.value);
-                    }}
-                  />
-                </div>
-              )}
-
-              <Card className="mb-2" style={{ padding: "5px" }}>
-                <MDBRow>
-                  <MDBCol className="w-100">
-                    <div style={{ fontWeight: "700" }}>Mode of Entry</div>
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel>Select mode of entry</InputLabel>
-                      <Select
-                        value={modeOfEntry}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setModeOfEntry(e.target.value);
-                        }}
-                      >
-                        {entryMode.map((e, i) => {
-                          return <MenuItem value={e.name}>{e.name}</MenuItem>;
-                        })}
-                      </Select>
-                    </FormControl>
-                  </MDBCol>
-
-                  <MDBCol className="w-100">
-                    <div style={{ fontWeight: "700" }}>Session of Entry</div>
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel>Select mode of entry</InputLabel>
-                      <Select
-                        value={entrySession}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setEntrySession(e.target.value);
-                        }}
-                      >
-                        {sessionOfEntry.map((s, i) => {
-                          return <MenuItem value={s.name}>{s.name}</MenuItem>;
-                        })}
-                      </Select>
-                    </FormControl>
-                  </MDBCol>
-                </MDBRow>
-              </Card>
-
-              <Card style={{ padding: "5px" }}>
-                <MDBRow>
-                  <MDBCol className="w-100">
-                    <div style={{ fontWeight: "700" }}>First choice</div>
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel id="demo-simple-select-label">
-                        Choose Programme
-                      </InputLabel>
-                      <Select
-                        value={programme}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setProgramme(e.target.value);
-
-                          programmes.map((prog, i) => {
-                            // Add a check to ensure prog is defined
-                            if (prog && prog.name === e.target.value) {
-                              setCourses(programmes[i].programs);
-                              setCourse(programmes[i].programs[0].name);
+                  >
+                    {jambFromWaiver ? (
+                      <span style={{ color: "#05321e" }}>
+                        ✓ JAMB details pre-filled — application fee waived.
+                      </span>
+                    ) : (
+                      <>
+                        Check I don't have JAMB box, if it is not yet ready.
+                        <br />
+                        <FormControlLabel
+                          control={
+                            <input className="reg-radio" type="checkbox" />
+                          }
+                          label="I don't have JAMB"
+                          checked={hasJamb}
+                          onChange={() => {
+                            if (hasJamb) {
+                              setHasJamb(false);
+                            } else {
+                              setHasJamb(true);
                             }
-                            return null; // Return null to satisfy map function
-                          });
-                        }}
-                      >
-                        {programmes.map((prog) => (
-                          <MenuItem key={prog.name} value={prog.name}>
-                            {prog.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </MDBCol>
-                </MDBRow>
+                          }}
+                        />
+                      </>
+                    )}
+                  </div>
+                </FormGroup>
 
-                <MDBRow>
-                  <MDBCol className="w-100">
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel>Choose Course</InputLabel>
-                      <Select
-                        value={course}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setCourse(e.target.value);
-                        }}
-                      >
-                        {courses.map(
-                          (cse) =>
-                            cse.name !== course2 &&
-                            cse.entryMode === modeOfEntry &&
-                            cse.session === entrySession && (
-                              <MenuItem key={cse.name} value={cse.name}>
-                                {cse.name}
-                              </MenuItem>
-                            )
-                        )}
-                      </Select>
-                    </FormControl>
-                  </MDBCol>
-                </MDBRow>
-              </Card>
+                {hasJamb && (
+                  <div>
+                    <TextField
+                      style={{ width: "90%" }}
+                      label="Your JAMB Number"
+                      variant="outlined"
+                      margin="normal"
+                      value={jambNumber}
+                      onChange={(e) => {
+                        if (!jambFromWaiver) setJambNumber(e.target.value);
+                      }}
+                      InputProps={{ readOnly: jambFromWaiver }}
+                      // required
+                    />
 
-              <Card style={{ padding: "5px", marginTop: "5px" }}>
-                <MDBRow>
-                  <MDBCol className="w-100">
-                    <div style={{ fontWeight: "700" }}>Second choice</div>
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel>Choose Programme</InputLabel>
-                      <Select
-                        value={programme2}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setProgramme2(e.target.value);
+                    <TextField
+                      style={{ width: "90%" }}
+                      label="Your JAMB Score"
+                      variant="outlined"
+                      margin="normal"
+                      value={jambScore}
+                      onChange={(e) => {
+                        if (!jambFromWaiver) setJambScore(e.target.value);
+                      }}
+                      InputProps={{ readOnly: jambFromWaiver }}
+                    />
+                  </div>
+                )}
 
-                          programmes.map((prog, i) => {
-                            if (prog.name === e.target.value) {
-                              setCourses2(programmes[i].programs);
-                              try {
-                                setCourse2(programmes[i].programs[1].name);
-                              } catch (error) {
-                                // setCourse2(programmes[i].programs[0].name);
+                <Card className="mb-2" style={{ padding: "5px" }}>
+                  <MDBRow>
+                    <MDBCol className="w-100">
+                      <div style={{ fontWeight: "700" }}>Mode of Entry</div>
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel>Select mode of entry</InputLabel>
+                        <Select
+                          value={modeOfEntry}
+                          label="Choose Programme"
+                          onChange={(e) => {
+                            setModeOfEntry(e.target.value);
+                          }}
+                        >
+                          {entryMode.map((e, i) => {
+                            return <MenuItem value={e.name}>{e.name}</MenuItem>;
+                          })}
+                        </Select>
+                      </FormControl>
+                    </MDBCol>
+
+                    <MDBCol className="w-100">
+                      <div style={{ fontWeight: "700" }}>Session of Entry</div>
+                      <FormControl margin="normal" fullWidth>
+                        <TextField
+                          label="Session of Entry"
+                          value={
+                            activeSessionLoading
+                              ? "Loading..."
+                              : entrySession || "No active session"
+                          }
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </FormControl>
+                    </MDBCol>
+                  </MDBRow>
+                </Card>
+
+                <Card style={{ padding: "5px" }}>
+                  <MDBRow>
+                    <MDBCol className="w-100">
+                      <div style={{ fontWeight: "700" }}>First choice</div>
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel id="demo-simple-select-label">
+                          Choose Programme
+                        </InputLabel>
+                        <Select
+                          value={programme}
+                          label="Choose Programme"
+                          onChange={(e) => {
+                            setProgramme(e.target.value);
+
+                            programmes.map((prog, i) => {
+                              // Add a check to ensure prog is defined
+                              if (prog && prog.name === e.target.value) {
+                                setCourses(programmes[i].programs);
+                                setCourse(programmes[i].programs[0].name);
                               }
-                            }
-                          });
-                        }}
-                      >
-                        {programmes.map((prog) => {
-                          return (
-                            <MenuItem value={prog.name}>{prog.name}</MenuItem>
-                          );
-                        })}
-                      </Select>
-                    </FormControl>
-                  </MDBCol>
-                </MDBRow>
+                              return null; // Return null to satisfy map function
+                            });
+                          }}
+                        >
+                          {programmes.map((prog) => (
+                            <MenuItem key={prog.name} value={prog.name}>
+                              {prog.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </MDBCol>
+                  </MDBRow>
 
-                <MDBRow>
-                  <MDBCol className="w-100">
-                    <FormControl margin="normal" fullWidth>
-                      <InputLabel>Choose Course</InputLabel>
-                      <Select
-                        value={course2}
-                        label="Choose Programme"
-                        onChange={(e) => {
-                          setCourse2(e.target.value);
-                        }}
-                      >
-                        {Array.isArray(courses2) &&
-                          courses2.map(
+                  <MDBRow>
+                    <MDBCol className="w-100">
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel>Choose Course</InputLabel>
+                        <Select
+                          value={course}
+                          label="Choose Programme"
+                          onChange={(e) => {
+                            setCourse(e.target.value);
+                          }}
+                        >
+                          {courses.map(
                             (cse) =>
-                              cse.name !== course &&
+                              cse.name !== course2 &&
                               cse.entryMode === modeOfEntry &&
                               cse.session === entrySession && (
                                 <MenuItem key={cse.name} value={cse.name}>
                                   {cse.name}
                                 </MenuItem>
-                              )
+                              ),
                           )}
+                        </Select>
+                      </FormControl>
+                    </MDBCol>
+                  </MDBRow>
+                </Card>
+
+                <Card style={{ padding: "5px", marginTop: "5px" }}>
+                  <MDBRow>
+                    <MDBCol className="w-100">
+                      <div style={{ fontWeight: "700" }}>Second choice</div>
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel>Choose Programme</InputLabel>
+                        <Select
+                          value={programme2}
+                          label="Choose Programme"
+                          onChange={(e) => {
+                            setProgramme2(e.target.value);
+
+                            programmes.map((prog, i) => {
+                              if (prog.name === e.target.value) {
+                                setCourses2(programmes[i].programs);
+                                try {
+                                  setCourse2(programmes[i].programs[1].name);
+                                } catch (error) {
+                                  // setCourse2(programmes[i].programs[0].name);
+                                }
+                              }
+                            });
+                          }}
+                        >
+                          {programmes.map((prog) => {
+                            return (
+                              <MenuItem value={prog.name}>{prog.name}</MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                    </MDBCol>
+                  </MDBRow>
+
+                  <MDBRow>
+                    <MDBCol className="w-100">
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel>Choose Course</InputLabel>
+                        <Select
+                          value={course2}
+                          label="Choose Programme"
+                          onChange={(e) => {
+                            setCourse2(e.target.value);
+                          }}
+                        >
+                          {Array.isArray(courses2) &&
+                            courses2.map(
+                              (cse) =>
+                                cse.name !== course &&
+                                cse.entryMode === modeOfEntry &&
+                                cse.session === entrySession && (
+                                  <MenuItem key={cse.name} value={cse.name}>
+                                    {cse.name}
+                                  </MenuItem>
+                                ),
+                            )}
+                        </Select>
+                      </FormControl>
+                    </MDBCol>
+                  </MDBRow>
+                </Card>
+              </Card>
+            </MDBCol>
+          </MDBRow>
+
+          <MDBRow className="mb-4 w-100">
+            <MDBCol
+              md={12}
+              className="d-flex flex-column align-items-center justify-content-center"
+            >
+              <Card sx={{ maxWidth: 500 }} className="p-4 w-100">
+                <div className="reg-captions">Educational Details</div>
+                <MDBRow>
+                  <MDBCol className="w-100">
+                    <TextField
+                      label="Primary School"
+                      variant="outlined"
+                      margin="normal"
+                      onBlur={(e) => {
+                        setPrimary(stringFormatter(e));
+                      }}
+                      required
+                    />
+                  </MDBCol>
+                  <MDBCol className="w-100">
+                    <FormControl margin="normal" fullWidth>
+                      <InputLabel>Year of Graduation</InputLabel>
+                      <Select
+                        value={primaryGradYear}
+                        label="Year of Graduation"
+                        onChange={(e) => {
+                          setPrimaryGradYear(e.target.value);
+                        }}
+                      >
+                        {yearsList}
                       </Select>
                     </FormControl>
                   </MDBCol>
                 </MDBRow>
-              </Card>
-            </Card>
-          </MDBCol>
-        </MDBRow>
 
-        <MDBRow className="mb-4 w-100">
-          <MDBCol
-            md={12}
-            className="d-flex flex-column align-items-center justify-content-center"
-          >
-            <Card sx={{ maxWidth: 500 }} className="p-4 w-100">
-              <div className="reg-captions">Educational Details</div>
-              <MDBRow>
-                <MDBCol className="w-100">
-                  <TextField
-                    label="Primary School"
-                    variant="outlined"
-                    margin="normal"
-                    onBlur={(e) => {
-                      setPrimary(stringFormatter(e));
-                    }}
-                    required
-                  />
-                </MDBCol>
-                <MDBCol className="w-100">
-                  <FormControl margin="normal" fullWidth>
-                    <InputLabel>Year of Graduation</InputLabel>
-                    <Select
-                      value={primaryGradYear}
-                      label="Year of Graduation"
-                      onChange={(e) => {
-                        setPrimaryGradYear(e.target.value);
+                <MDBRow>
+                  <MDBCol className="w-100">
+                    <TextField
+                      label="Secondary School"
+                      variant="outlined"
+                      margin="normal"
+                      onBlur={(e) => {
+                        setSecondarySchool(stringFormatter(e));
                       }}
-                    >
-                      {yearsList}
-                    </Select>
-                  </FormControl>
-                </MDBCol>
-              </MDBRow>
-
-              <MDBRow>
-                <MDBCol className="w-100">
-                  <TextField
-                    label="Secondary School"
-                    variant="outlined"
-                    margin="normal"
-                    onBlur={(e) => {
-                      setSecondarySchool(stringFormatter(e));
-                    }}
-                    required
-                  />
-                </MDBCol>
-                <MDBCol className="w-100">
-                  <FormControl margin="normal" fullWidth>
-                    <InputLabel>Year of Graduation</InputLabel>
-                    <Select
-                      value={secGradYear}
-                      label="Year of Graduation"
-                      onChange={(e) => {
-                        setSecGradYear(e.target.value);
-                      }}
-                    >
-                      {yearsList}
-                    </Select>
-                  </FormControl>
-                </MDBCol>
-              </MDBRow>
-
-              <MDBRow>
-                <MDBCol className="w-100">
-                  <TextField
-                    label="Other School"
-                    variant="outlined"
-                    margin="normal"
-                    onBlur={(e) => {
-                      setOtherSchool(stringFormatter(e));
-                    }}
-                  />
-                </MDBCol>
-                <MDBCol className="w-100">
-                  <FormControl margin="normal" fullWidth>
-                    <InputLabel>Year of Graduation</InputLabel>
-                    <Select
-                      value={otherGradYear}
-                      label="Year of Graduation"
-                      onChange={(e) => {
-                        setOtherGradYear(e.target.value);
-                      }}
-                    >
-                      {yearsList}
-                    </Select>
-                  </FormControl>
-                </MDBCol>
-              </MDBRow>
-
-              <TextField
-                label="Highest Qualification"
-                variant="outlined"
-                margin="normal"
-                onBlur={(e) => {
-                  setHighestQualification(e.target.value);
-                }}
-                fullWidth
-              />
-            </Card>
-          </MDBCol>
-        </MDBRow>
-
-        <MDBRow className="mb-4 w-100">
-          <MDBCol className="d-flex flex-column align-items-center justify-content-center">
-            <Card sx={{ maxWidth: 500 }} className="p-4 w-100">
-              <div className="reg-captions">SSCE Result</div>
-
-              <FormGroup>
-                <div
-                  style={{
-                    fontSize: "12px",
-                    textAlign: "left",
-                    color: "green",
-                    fontWeight: 600,
-                  }}
-                >
-                  If your result is not ready please check awaiting result below
-                  to allow you proceed with your application.
-                </div>
-                <FormControlLabel
-                  control={<input className="reg-radio" type="checkbox" />}
-                  label="Awaiting result"
-                  checked={isAwaitingResult}
-                  onChange={() => {
-                    if (isAwaitingResult) {
-                      setIsAwaitingResult(false);
-                    } else {
-                      setIsAwaitingResult(true);
-                    }
-                  }}
-                />
-              </FormGroup>
-
-              {!isAwaitingResult && (
-                <div>
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel>Number of Sitting</InputLabel>
-                    <Select
-                      value={SSCE_Sittings}
-                      label="Number of Sitting"
-                      onChange={(e) => {
-                        setSSCESittings(e.target.value);
-                      }}
-                    >
-                      <MenuItem value={"1"}>1</MenuItem>
-                      <MenuItem value={"2"}>2</MenuItem>
-                    </Select>
-                  </FormControl>
-
-                  <div>
-                    <SelectionBox
-                      val={numOfSubjects}
-                      validate={validate}
-                      value={secondrySubject}
-                      label="Subjects"
-                      changed={(e) => {
-                        setSecondrySubject(e);
-                      }}
-                      content={secondrySubjects.map((subject) => {
-                        return (
-                          <MenuItem value={subject.name}>
-                            {subject.name}
-                          </MenuItem>
-                        );
-                      })}
+                      required
                     />
-
+                  </MDBCol>
+                  <MDBCol className="w-100">
                     <FormControl margin="normal" fullWidth>
-                      <InputLabel>Grade</InputLabel>
+                      <InputLabel>Year of Graduation</InputLabel>
                       <Select
-                        value={secondryScore}
+                        value={secGradYear}
+                        label="Year of Graduation"
                         onChange={(e) => {
-                          setSecondryScore(e.target.value);
+                          setSecGradYear(e.target.value);
                         }}
-                        label="Grade"
                       >
-                        <MenuItem value={"default"}>Choose Grade</MenuItem>
-                        {secondryScores.map((score) => {
-                          return (
-                            <MenuItem value={score.name}>{score.name}</MenuItem>
-                          );
-                        })}
+                        {yearsList}
                       </Select>
                     </FormControl>
-                  </div>
+                  </MDBCol>
+                </MDBRow>
 
+                <MDBRow>
+                  <MDBCol className="w-100">
+                    <TextField
+                      label="Other School"
+                      variant="outlined"
+                      margin="normal"
+                      onBlur={(e) => {
+                        setOtherSchool(stringFormatter(e));
+                      }}
+                    />
+                  </MDBCol>
+                  <MDBCol className="w-100">
+                    <FormControl margin="normal" fullWidth>
+                      <InputLabel>Year of Graduation</InputLabel>
+                      <Select
+                        value={otherGradYear}
+                        label="Year of Graduation"
+                        onChange={(e) => {
+                          setOtherGradYear(e.target.value);
+                        }}
+                      >
+                        {yearsList}
+                      </Select>
+                    </FormControl>
+                  </MDBCol>
+                </MDBRow>
+
+                <TextField
+                  label="Highest Qualification"
+                  variant="outlined"
+                  margin="normal"
+                  onBlur={(e) => {
+                    setHighestQualification(e.target.value);
+                  }}
+                  fullWidth
+                />
+              </Card>
+            </MDBCol>
+          </MDBRow>
+
+          <MDBRow className="mb-4 w-100">
+            <MDBCol className="d-flex flex-column align-items-center justify-content-center">
+              <Card sx={{ maxWidth: 500 }} className="p-4 w-100">
+                <div className="reg-captions">SSCE Result</div>
+
+                <FormGroup>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      textAlign: "left",
+                      color: "green",
+                      fontWeight: 600,
+                    }}
+                  >
+                    If your result is not ready please check awaiting result
+                    below to allow you proceed with your application.
+                  </div>
+                  <FormControlLabel
+                    control={<input className="reg-radio" type="checkbox" />}
+                    label="Awaiting result"
+                    checked={isAwaitingResult}
+                    onChange={() => {
+                      if (isAwaitingResult) {
+                        setIsAwaitingResult(false);
+                      } else {
+                        setIsAwaitingResult(true);
+                      }
+                    }}
+                  />
+                </FormGroup>
+
+                {!isAwaitingResult && (
                   <div>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>SUBJECT</th>
-                          <th>GRADE</th>
-                          <th>DELETE</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {tableRow.map((row) => {
-                          return row;
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel>Number of Sitting</InputLabel>
+                      <Select
+                        value={SSCE_Sittings}
+                        label="Number of Sitting"
+                        onChange={(e) => {
+                          setSSCESittings(e.target.value);
+                        }}
+                      >
+                        <MenuItem value={"1"}>1</MenuItem>
+                        <MenuItem value={"2"}>2</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <div>
+                      <SelectionBox
+                        val={numOfSubjects}
+                        validate={validate}
+                        value={secondrySubject}
+                        label="Subjects"
+                        changed={(e) => {
+                          setSecondrySubject(e);
+                        }}
+                        content={secondrySubjects.map((subject) => {
+                          return (
+                            <MenuItem value={subject.name}>
+                              {subject.name}
+                            </MenuItem>
+                          );
                         })}
-                      </tbody>
-                    </table>
+                      />
+
+                      <FormControl margin="normal" fullWidth>
+                        <InputLabel>Grade</InputLabel>
+                        <Select
+                          value={secondryScore}
+                          onChange={(e) => {
+                            setSecondryScore(e.target.value);
+                          }}
+                          label="Grade"
+                        >
+                          <MenuItem value={"default"}>Choose Grade</MenuItem>
+                          {secondryScores.map((score) => {
+                            return (
+                              <MenuItem value={score.name}>
+                                {score.name}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                    </div>
+
+                    <div>
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>SUBJECT</th>
+                            <th>GRADE</th>
+                            <th>DELETE</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {tableRow.map((row) => {
+                            return row;
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
+                )}
+              </Card>
+            </MDBCol>
+          </MDBRow>
+
+          <MDBRow className="mb-4 w-100">
+            <MDBCol className="d-flex flex-column align-items-center justify-content-center">
+              <Card sx={{ maxWidth: 500 }} className="p-4">
+                <div className="reg-captions">Other Details</div>
+                <TextField
+                  id="outlined-basic"
+                  label="Parent/Gurdian Name"
+                  variant="outlined"
+                  className="center-cmp w-100"
+                  margin="normal"
+                  onBlur={(e) => {
+                    setGurdianName(stringFormatter(e));
+                  }}
+                  required
+                />
+                <TextField
+                  label="Parent/Gurdian Phone number"
+                  className="center-cmp w-100"
+                  variant="outlined"
+                  margin="normal"
+                  onBlur={(e) => {
+                    let prNum = e.target.value;
+                    if (prNum === phoneNumber) {
+                      setGudianPhoneNumber("");
+                      Toast.fire({
+                        icon: "error",
+                        title:
+                          "Parent/Guardian's phone number must not be equal to the applicants phone number",
+                      });
+                    } else {
+                      setGudianPhoneNumber(e.target.value);
+                    }
+                  }}
+                  required
+                />
+                <TextField
+                  label="Parent/Gurdian Address"
+                  className="center-cmp w-100"
+                  variant="outlined"
+                  margin="normal"
+                  onBlur={(e) => {
+                    setGurdianAddress(stringFormatter(e));
+                  }}
+                  required
+                />
+                <TextField
+                  label="Parent/Gurdian email"
+                  className="center-cmp w-100"
+                  variant="outlined"
+                  margin="normal"
+                  onBlur={(e) => {
+                    setGurdianEmail(stringFormatter(e));
+                  }}
+                />
+
+                <div
+                  onClick={() => {
+                    if (!ninVerified) {
+                      Toast.fire({
+                        icon: "warning",
+                        title: "Please verify your NIN before submitting.",
+                      });
+                      navigate("/registration/nin-verification", {
+                        state: {
+                          ...location.state,
+                          userData: location.state?.userData,
+                          jambData: location.state?.jambData,
+                        },
+                      });
+                      return;
+                    }
+                    handleSubmit();
+                  }}
+                  className="reg-button"
+                >
+                  Submit
                 </div>
-              )}
-            </Card>
-          </MDBCol>
-        </MDBRow>
-
-        <MDBRow className="mb-4 w-100">
-          <MDBCol className="d-flex flex-column align-items-center justify-content-center">
-            <Card sx={{ maxWidth: 500 }} className="p-4">
-              <div className="reg-captions">Other Details</div>
-              <TextField
-                id="outlined-basic"
-                label="Parent/Gurdian Name"
-                variant="outlined"
-                className="center-cmp w-100"
-                margin="normal"
-                onBlur={(e) => {
-                  setGurdianName(stringFormatter(e));
-                }}
-                required
-              />
-              <TextField
-                label="Parent/Gurdian Phone number"
-                className="center-cmp w-100"
-                variant="outlined"
-                margin="normal"
-                onBlur={(e) => {
-                  let prNum = e.target.value;
-                  if (prNum === phoneNumber) {
-                    setGudianPhoneNumber("");
-                    Toast.fire({
-                      icon: "error",
-                      title:
-                        "Parent/Guardian's phone number must not be equal to the applicants phone number",
-                    });
-                  } else {
-                    setGudianPhoneNumber(e.target.value);
-                  }
-                }}
-                required
-              />
-              <TextField
-                label="Parent/Gurdian Address"
-                className="center-cmp w-100"
-                variant="outlined"
-                margin="normal"
-                onBlur={(e) => {
-                  setGurdianAddress(stringFormatter(e));
-                }}
-                required
-              />
-              <TextField
-                label="Parent/Gurdian email"
-                className="center-cmp w-100"
-                variant="outlined"
-                margin="normal"
-                onBlur={(e) => {
-                  setGurdianEmail(stringFormatter(e));
-                }}
-              />
-
-              <div onClick={handleSubmit} className="reg-button">
-                Submit
-              </div>
-            </Card>
-          </MDBCol>
-        </MDBRow>
+              </Card>
+            </MDBCol>
+          </MDBRow>
+        </div>
       </MDBContainer>
     </div>
   );

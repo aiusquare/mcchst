@@ -34,11 +34,11 @@ const SideNavBar = () => {
   };
 
   return (
-    <div style={{  display: "flex" }}>
+    <div style={{ display: "flex" }}>
       <Sidebar
         breakPoint="sm"
         transitionDuration={800}
-        style={{  background: "#ffffff" }}
+        style={{ background: "#ffffff" }}
       >
         <Menu>
           <div style={{ display: "flex" }}>
@@ -87,6 +87,16 @@ const SideNavBar = () => {
             Time table
           </MenuItem>
 
+          <MenuItem
+            style={{ textAlign: "left" }}
+            onClick={() => {
+              handleAccess("course-registration");
+            }}
+            icon={<BarIcons img={applicationIcon} />}
+          >
+            Course Registration
+          </MenuItem>
+
           <SubMenu
             icon={<BarIcons img={financeIcon} />}
             label="Payments"
@@ -124,6 +134,26 @@ const SideNavBar = () => {
           <MenuItem
             style={{ textAlign: "left" }}
             onClick={() => {
+              handleAccess("undertakings");
+            }}
+            icon={<BarIcons img={financeIcon} />}
+          >
+            Undertakings
+          </MenuItem>
+
+          <MenuItem
+            style={{ textAlign: "left" }}
+            onClick={() => {
+              handleAccess("clearance");
+            }}
+            icon={<BarIcons img={usersIcon} />}
+          >
+            Clearance
+          </MenuItem>
+
+          <MenuItem
+            style={{ textAlign: "left" }}
+            onClick={() => {
               handleAccess("acc-calender");
             }}
             icon={<BarIcons img={calenderIcon} />}
@@ -134,11 +164,11 @@ const SideNavBar = () => {
           <MenuItem
             style={{ textAlign: "left" }}
             onClick={() => {
-              // handleAccess("settings");
+              handleAccess("course-registration");
             }}
             icon={<BarIcons img={examIcon} />}
           >
-            Exams
+            Exam Card
           </MenuItem>
         </Menu>
       </Sidebar>

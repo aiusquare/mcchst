@@ -249,7 +249,7 @@ export default function AdminLoginComponent() {
                         setAccessMode("readOnly");
                       }
 
-                      if (e === "officer") {
+                      if (e === "officer" || e === "accounting") {
                         setIsOfficer(true);
                       } else {
                         setIsOfficer(false);

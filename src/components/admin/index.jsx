@@ -27,7 +27,12 @@ export default function DashBoard() {
       <div ref={dashboardRef} style={{ display: "flex" }}>
         <SideNavBar />
         <div
-          style={{ width: "100%", height: "100%", backgroundColor: "#f4f4f4" }}
+          style={{
+            flex: 1,
+            minWidth: 0,
+            height: "100%",
+            backgroundColor: "#f4f4f4",
+          }}
         >
           <div>
             <TopBar />
@@ -35,9 +40,15 @@ export default function DashBoard() {
               <MenuItem>Profile</MenuItem>
             </Menu>
           </div>
-          <div className="main-content-dsb">
-            <div className="d-flex align-items-center justify-content-center">
-              <MDBCard className=" shadow-2 m-4 w-100">
+          <div className="main-content-dsb" style={{ minWidth: 0 }}>
+            <div
+              className="d-flex align-items-center justify-content-center"
+              style={{ minWidth: 0 }}
+            >
+              <MDBCard
+                className=" shadow-2 m-4 w-100"
+                style={{ maxWidth: "calc(100% - 3rem)", overflow: "hidden" }}
+              >
                 <ServiceComContext.Consumer>
                   {(contextData) => <Outlet {...contextData} />}
                 </ServiceComContext.Consumer>

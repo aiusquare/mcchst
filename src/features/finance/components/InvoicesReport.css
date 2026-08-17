@@ -1,3 +1,9 @@
+.invoices-card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden; /* keep scroll inside the table wrapper */
+}
+
 /* InvoicesReport Styles */
 .card {
   border: none;
@@ -21,6 +27,210 @@
 
 .table td {
   vertical-align: middle;
+}
+
+.invoices-table {
+  display: block;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: auto; /* Enable both scroll directions */
+}
+
+.invoices-table table {
+  width: 100%;
+  min-width: 1100px; /* Force horizontal scroll when space is tight */
+}
+
+.invoices-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.invoice-filter-panel {
+  background: #fff;
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(32, 43, 54, 0.06);
+  padding: 1rem;
+}
+
+.invoice-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #edf0f4;
+  padding-bottom: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.invoice-filter-eyebrow {
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.invoice-filter-title {
+  color: #27313c;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0.15rem 0 0;
+}
+
+.invoice-filter-summary {
+  align-items: flex-end;
+  color: #64748b;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.invoice-filter-summary strong {
+  color: #0f5132;
+  font-size: 1.25rem;
+}
+
+.invoice-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 2fr) repeat(3, minmax(150px, 1fr));
+  gap: 0.85rem;
+  align-items: end;
+}
+
+.invoice-filter-search {
+  grid-column: span 2;
+}
+
+.invoice-filter-panel .form-label {
+  color: #4b5563;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.invoice-filter-panel .form-control,
+.invoice-filter-panel .form-select {
+  min-height: 42px;
+  border-color: #d8dee7;
+  color: #27313c;
+  font-size: 0.9rem;
+}
+
+.invoice-search-control {
+  position: relative;
+}
+
+.invoice-search-control .fa-search {
+  color: #738195;
+  left: 0.85rem;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.invoice-search-control .form-control {
+  padding-left: 2.35rem;
+  padding-right: 2.35rem;
+}
+
+.invoice-search-clear {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #738195;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 0.45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+}
+
+.invoice-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invoice-filter-actions .btn {
+  min-height: 42px;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.invoice-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.85rem;
+}
+
+.invoice-filter-chip {
+  background: #eef6f2;
+  border: 1px solid #cde8db;
+  border-radius: 999px;
+  color: #0f5132;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.28rem 0.65rem;
+}
+
+.invoice-document {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.invoice-clearance-summary {
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.invoice-clearance-stats {
+  color: #666;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  gap: 0.85rem;
+}
+
+.invoice-clearance-ring {
+  align-items: center;
+  border-radius: 50%;
+  color: #333;
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 1.4rem;
+  font-weight: 700;
+  height: 96px;
+  justify-content: center;
+  width: 96px;
+}
+
+.invoice-info-strip {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  text-align: left;
+}
+
+.invoice-breakdown-table th,
+.invoice-breakdown-table td {
+  text-align: left;
 }
 
 .badge {
@@ -79,16 +289,63 @@
 /* Print styles */
 @media print {
   .btn-group,
-  .filters-section {
+  .filters-section,
+  .invoice-filter-panel {
     display: none !important;
   }
-  
+
   .card {
     border: none !important;
     box-shadow: none !important;
   }
-  
+
   .table {
     width: 100% !important;
+  }
+}
+
+@media (max-width: 1199px) {
+  .invoice-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .invoice-filter-search {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .invoice-document {
+    padding: 1rem;
+  }
+
+  .invoice-clearance-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .invoice-info-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-info-strip .text-end {
+    text-align: left !important;
+  }
+
+  .invoice-filter-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .invoice-filter-summary {
+    align-items: flex-start;
+  }
+
+  .invoice-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .invoice-filter-search {
+    grid-column: auto;
   }
 }

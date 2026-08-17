@@ -21,6 +21,8 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.3",
     "axios": "^1.6.7",
     "bootstrap": "^5.3.7",
     "dayjs": "^1.11.10",
@@ -59,6 +61,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
+  "proxy": "https://app.mcchstfuntua.edu.ng",
   "eslintConfig": {
     "extends": [
       "react-app",

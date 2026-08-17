@@ -4,6 +4,165 @@
   }
 }
 
+/* NIN Verification section */
+.nin-verify-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+
+.nin-photo {
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #05321e;
+  flex-shrink: 0;
+}
+
+.nin-input-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.nin-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.nin-verify-btn {
+  background-color: #057a55;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.nin-verify-btn:disabled {
+  background-color: #05321e;
+  cursor: not-allowed;
+}
+
+.nin-verified-label {
+  color: #05321e;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.nin-identity-card {
+  border: 1px solid #d6e4dc;
+  background: #f8fbf9;
+  border-radius: 6px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.nin-identity-title {
+  color: #05321e;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.nin-identity-name {
+  color: #05321e;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+
+.nin-identity-grid {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 4px 8px;
+  font-size: 12px;
+  color: #33443b;
+}
+
+.nin-identity-grid span {
+  color: #68766d;
+}
+
+.nin-identity-grid strong {
+  color: #24382d;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.nin-reattempt-btn {
+  background-color: transparent;
+  color: #c0392b;
+  border: 1px solid #c0392b;
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+/* Locks all form sections below NIN until verification is done */
+.form-locked {
+  pointer-events: none;
+  opacity: 0.38;
+  user-select: none;
+  filter: blur(1px);
+}
+
+.nin-lock-notice {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px auto 4px;
+  background: #fff8e1;
+  border: 1px solid #f9a825;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7a5900;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .nin-verify-row {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nin-photo {
+    width: 90px;
+    height: 110px;
+  }
+
+  .nin-input-block {
+    width: 100%;
+  }
+
+  .nin-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nin-identity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .nin-verify-btn {
+    width: 100%;
+    margin-top: 0;
+    padding: 12px;
+  }
+}
+
 @media (max-width: 576px) {
   .wallet-card-q div {
     font-size: small;
@@ -32,18 +191,23 @@
 
 @font-face {
   font-family: "DedicHeaderFont";
-  src: local("DedicHeaderFont"),
+  src:
+    local("DedicHeaderFont"),
     url(../fonts/ChunkFive-Regular.otf) format("opentype");
 }
 
 @font-face {
   font-family: "regularFont";
-  src: local("regularFont"), url(../fonts/Pacifico.ttf) format("truetype");
+  src:
+    local("regularFont"),
+    url(../fonts/Pacifico.ttf) format("truetype");
 }
 
 @font-face {
   font-family: "Charm";
-  src: local("Charm"), url(../fonts/Charm-Regular.ttf) format("truetype");
+  src:
+    local("Charm"),
+    url(../fonts/Charm-Regular.ttf) format("truetype");
 }
 
 :root {
@@ -223,8 +387,10 @@ tr.highlight td {
 #navBar {
   color: #191a68;
   background-color: rgba(252, 250, 250, 0.507);
-  box-shadow: 0 4px 5px 0 rgba(20, 19, 19, 0.14),
-    0 1px 10px 0 rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  box-shadow:
+    0 4px 5px 0 rgba(20, 19, 19, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2);
 }
 
 .custom_features_bg {
@@ -233,8 +399,8 @@ tr.highlight td {
   --_s: calc(2 * var(--s)) calc(2 * var(--s));
   --_g: 35.36% 35.36% at;
   --_c: #0000 66%, #13111125 68% 70%, #0000 72%;
-  background: radial-gradient(var(--_g) 100% 25%, var(--_c)) var(--s) var(--s) /
-      var(--_s),
+  background:
+    radial-gradient(var(--_g) 100% 25%, var(--_c)) var(--s) var(--s) / var(--_s),
     radial-gradient(var(--_g) 0 75%, var(--_c)) var(--s) var(--s) / var(--_s),
     radial-gradient(var(--_g) 100% 25%, var(--_c)) 0 0 / var(--_s),
     radial-gradient(var(--_g) 0 75%, var(--_c)) 0 0 / var(--_s),
@@ -251,8 +417,8 @@ tr.highlight td {
   --gp: 50% / calc(var(--u) * 5) calc(var(--u) * 10);
   --bp: calc(var(--u) * -2.5) calc(var(--u) * -5);
   height: 100%;
-  --bg: radial-gradient(circle at 50% 25%, var(--c2) 23%, #fff0 25% 100%)
-      var(--gp),
+  --bg:
+    radial-gradient(circle at 50% 25%, var(--c2) 23%, #fff0 25% 100%) var(--gp),
     conic-gradient(from 270deg at 34% 46%, var(--c2) 0 12.5%, #fff0 0 100%)
       var(--gp),
     conic-gradient(from 45deg at 66% 46%, var(--c2) 0 12.5%, #fff0 0 100%)
@@ -284,9 +450,29 @@ tr.highlight td {
       var(--gp),
     linear-gradient(180deg, var(--c1) 50%, #fff0 0 100%) var(--gp);
   background: var(--bg), var(--bg);
-  background-position: var(--bp), var(--bp), var(--bp), var(--bp), var(--bp),
-    var(--bp), var(--bp), var(--bp), var(--bp), var(--bp), var(--bp), 0 0, 0 0,
-    0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-position:
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    var(--bp),
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0,
+    0 0;
   background-color: var(--c2);
 }
 
@@ -294,8 +480,8 @@ tr.highlight td {
   --s: 60px;
 
   --_g: #c4212121 83%, #ffffff 85% 99%, #b33838 101%;
-  background: radial-gradient(27% 29% at right, var(--_g)) calc(var(--s) / 2)
-      var(--s),
+  background:
+    radial-gradient(27% 29% at right, var(--_g)) calc(var(--s) / 2) var(--s),
     radial-gradient(27% 29% at left, var(--_g)) calc(var(--s) / -2) var(--s),
     radial-gradient(29% 27% at top, var(--_g)) 0 calc(var(--s) / 2),
     radial-gradient(29% 27% at bottom, var(--_g)) 0 calc(var(--s) / -2) #ffffff;

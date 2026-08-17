@@ -10,8 +10,10 @@ import {
 } from "mdb-react-ui-kit";
 import { Alert, Collapse, Snackbar, Stack, TextField } from "@mui/material";
 import { usePaystackPayment } from "react-paystack";
+import request from "superagent";
 import logo from "../pictures/am_data.png";
 import { ServiceComContext } from "./dashboard";
+import { baseUrl } from "../../services/setup";
 import Spinner from "./spinner";
 
 const Atm = (props) => {
@@ -116,7 +118,21 @@ const Atm = (props) => {
                         walletFundingAmount !== "" &&
                         walletFundingAmount >= 100
                       ) {
-                        initializePayment();
+                        initializePayment({
+                          onSuccess: async (response) => {
+                            try {
+                              await request
+                                .post(baseUrl + "billing/verify_wallet_funding")
+                                .send({
+                                  TransactionReference: response.reference,
+                                  userEmail: userEmail,
+                                });
+                            } catch (err) {
+                              // payment verified by webhook; ignore network errors here
+                            }
+                          },
+                          onClose: () => {},
+                        });
                         hideModal();
                       } else {
                         setIncorrectAmount(true);

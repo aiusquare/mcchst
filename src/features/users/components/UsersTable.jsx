@@ -3,7 +3,20 @@ import { useNavigate } from "react-router-dom";
 import request from "superagent";
 import editIcon from "../../../pictures/edit.png";
 import { Toast } from "../../../components/errorNotifier";
+import { baseUrl } from "../../../services/setup";
+import {
+  ADMIN_PAGE_ACCESS_OPTIONS,
+  getUserAdditionalPages,
+} from "../../../utils/access-control";
 import "./styles.css";
+
+const pageLabels = ADMIN_PAGE_ACCESS_OPTIONS.flatMap((group) => group.pages).reduce(
+  (labels, page) => ({
+    ...labels,
+    [page.path]: page.label,
+  }),
+  {}
+);
 
 const UsersTable = () => {
   const navigate = useNavigate();
@@ -28,6 +41,11 @@ const UsersTable = () => {
           user.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
           `${user.access}/${user.mode}`
             .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          getUserAdditionalPages(user)
+            .map((page) => pageLabels[page] || page)
+            .join(" ")
+            .toLowerCase()
             .includes(searchQuery.toLowerCase())
       );
       setFilteredRows(filtered);
@@ -36,10 +54,10 @@ const UsersTable = () => {
 
   const handleDataFetch = async () => {
     try {
-      const response = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/get_users.php"
-      );
-      const basicDetails = response.body;
+      const response = await request.get(baseUrl + "admin/get_users");
+      const basicDetails = Array.isArray(response.body)
+        ? response.body
+        : response.body?.data || [];
       setRows(basicDetails);
       setInit(true);
     } catch (err) {
@@ -168,6 +186,14 @@ const UsersTable = () => {
                   <span className="privileges-tag">
                     {user.access}/{user.mode}
                   </span>
+                  {getUserAdditionalPages(user).length > 0 && (
+                    <div className="additional-pages-list">
+                      +{" "}
+                      {getUserAdditionalPages(user)
+                        .map((page) => pageLabels[page] || page)
+                        .join(", ")}
+                    </div>
+                  )}
                 </td>
                 <td>
                   <button

@@ -22,6 +22,13 @@ import { STAFF_STATUSES, ACCESS_MODES } from "../constants";
 import { validateUserForm } from "../utils/validation";
 import { useUserForm } from "../hooks/useUserForm";
 import { baseUrl } from "../../../services/setup";
+import {
+  ADMIN_PAGE_ACCESS_OPTIONS,
+  getUserAdditionalPages,
+  saveLocalAdditionalPagesForUser,
+  serializePageAccess,
+} from "../../../utils/access-control";
+import "./styles.css";
 
 const CreateUser = (props) => {
   const navigate = useNavigate();
@@ -35,6 +42,7 @@ const CreateUser = (props) => {
       userStatus: userData.status ?? "",
       department: userData.department ?? "",
       office: userData.office_role ?? "",
+      additionalPages: getUserAdditionalPages(userData),
       hasAdminAccess: !!userData.access, // true if user has access
       isOfficer: userData.access === "officer", // guess based on role
     };
@@ -46,10 +54,10 @@ const CreateUser = (props) => {
     handleAccessChange,
     handleAdminAccessToggle,
     handleOfficerToggle,
+    handleAdditionalPageToggle,
   } = useUserForm(
     props.mode === "edit" ? mapUserDataToForm(props.userData) : {}
   );
-  console.log("props", props);
 
   const handleUserCreation = async () => {
     if (!validateUserForm(formData)) return;
@@ -60,24 +68,40 @@ const CreateUser = (props) => {
     }
 
     try {
-      loader({ title: "Creating User", text: "please wait..." });
+      loader({
+        title: props.mode === "edit" ? "Updating User" : "Creating User",
+        text: "please wait...",
+      });
+
+      const additionalPages = serializePageAccess(formData.additionalPages);
+      const payload = {
+        ...formData,
+        additionalPages: formData.additionalPages,
+        additional_pages: additionalPages,
+        page_access: additionalPages,
+      };
 
       if (props.mode !== "edit") {
         await request
           .post(baseUrl + "admin/create_user")
           .type("application/json")
-          .send(formData);
+          .send(payload);
       } else {
         await request
           .post(baseUrl + "admin/edit_user")
           .type("application/json")
-          .send(formData);
+          .send(payload);
       }
 
       Toast.fire({
         icon: "success",
-        title: "Successfully created",
+        title:
+          props.mode === "edit"
+            ? "User updated successfully"
+            : "Successfully created",
       });
+
+      saveLocalAdditionalPagesForUser(formData.userId, formData.additionalPages);
 
       navigate("/admin/users");
     } catch (err) {
@@ -227,6 +251,41 @@ const CreateUser = (props) => {
                       label="Read and Write"
                     />
                   </RadioGroup>
+
+                  <div className="mt-3">
+                    <div className="mode-label">Additional page access</div>
+                    <div className="text-muted small mb-2">
+                      Select pages this user should access in addition to their
+                      main access role.
+                    </div>
+
+                    {ADMIN_PAGE_ACCESS_OPTIONS.map((group) => (
+                      <div className="page-access-group" key={group.group}>
+                        <div className="page-access-group-title">
+                          {group.group}
+                        </div>
+                        <div className="page-access-options">
+                          {group.pages.map((page) => (
+                            <label
+                              className="page-access-option"
+                              key={page.path}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={(formData.additionalPages || []).includes(
+                                  page.path
+                                )}
+                                onChange={() =>
+                                  handleAdditionalPageToggle(page.path)
+                                }
+                              />
+                              <span>{page.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </MDBCol>

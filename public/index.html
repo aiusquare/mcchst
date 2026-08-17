@@ -1,7 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!--
+      Suppress "Script error." events thrown by cross-origin scripts
+      (e.g. Paystack's checkout iframe). This script tag must be the FIRST
+      script in the document so it runs before webpack's HMR runtime
+      registers its own error handler.
+    -->
+    <script>
+      window.addEventListener(
+        "error",
+        function (e) {
+          const isGenericScriptError =
+            e.message === "Script error." || e.message === "Script error";
+          const isCrossOriginUnknownError =
+            !e.error &&
+            typeof e.filename === "string" &&
+            e.filename.indexOf(window.location.origin) !== 0;
+
+          if (isGenericScriptError || isCrossOriginUnknownError) {
+            // preventDefault() causes React's handleWindowError to bail out
+            // even if it somehow runs after stopImmediatePropagation().
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          }
+        },
+        true,
+      );
+    </script>
+    <script src="%PUBLIC_URL%/maintenance-config.js?v=20260712-restore"></script>
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />

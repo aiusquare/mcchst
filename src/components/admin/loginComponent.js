@@ -6,7 +6,6 @@ import {
   MDBContainer,
   MDBRow,
 } from "mdb-react-ui-kit";
-import * as React from "react";
 import logo from "../../pictures/logo.png";
 import { Alert, Collapse, Stack } from "@mui/material";
 import TextInput from "./textField";
@@ -16,6 +15,11 @@ import { loader } from "../LoadingSpinner";
 import { Toast } from "../errorNotifier";
 import Swal from "sweetalert2";
 import request from "superagent";
+import { baseUrl } from "../../services/setup";
+import {
+  getUserAdditionalPages,
+  serializePageAccess,
+} from "../../utils/access-control";
 // import Spinner from "./spinner";
 // import { ReactSession } from "react-client-session";
 // import ForgotPassword from "./forgotPassword";
@@ -33,8 +37,8 @@ export default function AdminLoginComponent() {
     setUserCorrect(false);
     setPasswordCorrect(false);
     const data = {
-      AdminId: userName,
-      Password: password,
+      loginId: userName,
+      password: password,
     };
 
     if (validateForm()) {
@@ -42,21 +46,30 @@ export default function AdminLoginComponent() {
         fetch("https://www.google.com/", { mode: "no-cors" })
           .then(async () => {
             await request
-              .post("https://api.mcchstfuntua.edu.ng/admin/login.php")
+              .post(baseUrl + "auth/login")
+              .withCredentials()
               .type("application/json")
               .send(data)
               .then((response) => {
+                const responseData = response.body?.data || response.body;
+
+                if (response.body?.status === "error") {
+                  throw new Error(response.body.message || "Login failed");
+                }
+
+                if (response.body?.user && response.body.user !== "admin") {
+                  throw new Error("This account is not an admin user");
+                }
+
                 Toast.fire({
                   icon: "success",
                   title: "Logged successfully",
                 });
 
-                console.log(response.body);
-
-                if (response.body.password === "") {
+                if (responseData.password === "") {
                   localStorage.setItem("password_setup", "no");
                   navigate("/admin/create-password", {
-                    state: { data: response.body },
+                    state: { data: responseData },
                   });
                 } else {
                   localStorage.setItem("password_setup", "yes");
@@ -65,9 +78,16 @@ export default function AdminLoginComponent() {
                 // setting login session
                 localStorage.setItem("adminLogin", Date.now().toString());
 
-                const responseData = response.body;
+                const isAccountOfficer =
+                  responseData.access === "accounting" ||
+                  (responseData.access === "officer" &&
+                    ["accounting", "account-officer"].includes(
+                      responseData.office_role
+                    ));
 
-                if (responseData.access === "admission") {
+                if (isAccountOfficer) {
+                  navigate("/admin/invoices-report");
+                } else if (responseData.access === "admission") {
                   navigate("/admin/admission");
                 } else if (responseData.access === "finance") {
                   navigate("/admin/finance");
@@ -84,6 +104,10 @@ export default function AdminLoginComponent() {
                 localStorage.setItem("mode", responseData.mode);
                 localStorage.setItem("officeRole", responseData.office_role);
                 localStorage.setItem("department", responseData.department);
+                localStorage.setItem(
+                  "additionalPages",
+                  serializePageAccess(getUserAdditionalPages(responseData))
+                );
               })
               .catch((err) => {
                 let errorMsg = "";
@@ -93,7 +117,7 @@ export default function AdminLoginComponent() {
                   errorMsg = err.response.text;
                 } else {
                   // console.error("Network error:", err);
-                  errorMsg = err;
+                  errorMsg = err.message || err;
                 }
 
                 Swal.fire({

@@ -27,6 +27,11 @@ const SchInvoicePage = () => {
   const [invoiceData, setInvoiceData] = useState(null);
   const [invoiceItems, setInvoiceItems] = useState([]);
   const [total, setTotal] = useState(0);
+  const [itemPaymentStatus, setItemPaymentStatus] = useState({});
+  const [itemStatusLoading, setItemStatusLoading] = useState(false);
+  const [itemStatusError, setItemStatusError] = useState("");
+  const waiverAmount = parseFloat(invoiceData?.waiver_amount || 0);
+  const netTotal = Math.max(0, (parseFloat(total) || 0) - waiverAmount);
   const [userBalance, setUserBalance] = useState(0);
   const [payCode, setPayCode] = useState("");
 
@@ -42,17 +47,58 @@ const SchInvoicePage = () => {
           baseUrl + "invoices/get_invoice_items_by_id/",
           {
             invoiceId: incData.invoice_code,
-          }
+          },
         );
 
         if (invoiceItems) {
           const total = invoiceItems.reduce(
             (sum, item) => sum + (parseFloat(item.amount) || 0),
-            0
+            0,
           );
 
           setTotal(total);
           setInvoiceItems(invoiceItems);
+        }
+      };
+
+      // Fetch payment status for each item
+      const fetchItemPaymentStatus = async () => {
+        setItemStatusLoading(true);
+        setItemStatusError("");
+        try {
+          const response = await request
+            .post(baseUrl + "invoices/get_invoice_items_with_status/")
+            .withCredentials()
+            .type("application/json")
+            .send({
+              invoiceId: incData.invoice_code,
+              email: incData.target_id,
+            });
+
+          if (response.body && Array.isArray(response.body.data)) {
+            const statusMap = {};
+            response.body.data.forEach((item) => {
+              statusMap[item.item_id] = {
+                status: item.payment_status,
+                amount_paid: item.amount_paid,
+                paid_at: item.paid_at,
+                transaction_id: item.transaction_id,
+              };
+            });
+            setItemPaymentStatus(statusMap);
+          } else {
+            throw new Error("Invalid item payment status response");
+          }
+        } catch (err) {
+          console.log("Error fetching payment status:", err);
+          setItemPaymentStatus({});
+          setItemStatusError(
+            err.response?.body?.message ||
+              err.response?.body?.error ||
+              "Item payment statuses could not be loaded.",
+          );
+        } finally {
+          setItemStatusLoading(false);
         }
       };
 
@@ -73,6 +119,7 @@ const SchInvoicePage = () => {
 
       fetchFeesList();
       fetchBalance();
+      fetchItemPaymentStatus();
     }
   }, []);
 
@@ -90,12 +137,21 @@ const SchInvoicePage = () => {
 
   return (
     <MDBContainer className="py-4">
+      <div className="mb-3">
+        <MDBBtn color="secondary" size="sm" onClick={() => navigate(-1)}>
+          <i className="fas fa-arrow-left me-2"></i>Back
+        </MDBBtn>
+      </div>
       <div className="border p-4 bg-white position-relative shadow-sm rounded">
         {/* Status Badge */}
         <MDBRow>
           <MDBCol className="w-100 d-flex justify-content-end">
             <MDBBadge
-              color={invoiceData?.status === "PAID" ? "success" : "danger"}
+              color={
+                String(invoiceData?.status || "").toLowerCase() === "paid"
+                  ? "success"
+                  : "danger"
+              }
               pill
               className="absolute top-0 end-0 w-25 mb-3 p-2"
             >
@@ -142,25 +198,82 @@ const SchInvoicePage = () => {
           </div>
         </div>
 
+        {itemStatusError && (
+          <div className="alert alert-danger" role="alert">
+            {itemStatusError} The page will not assume unpaid status while this
+            information is unavailable.
+          </div>
+        )}
+
         <MDBTable hover>
           <MDBTableHead light>
             <tr className="fw-bold">
               <th style={{ textAlign: "left" }}>Description</th>
               <th style={{ textAlign: "left" }}>Amount</th>
+              <th style={{ textAlign: "left" }}>Status</th>
             </tr>
           </MDBTableHead>
 
           <MDBTableBody>
-            {invoiceItems.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.description}</td>
-                <td>{formatCurrency(parseFloat(item.amount) || 0)}</td>
-              </tr>
-            ))}
+            {invoiceItems.map((item, idx) => {
+              const status = itemPaymentStatus[item.id];
+              const statusLabel = itemStatusLoading
+                ? "Loading..."
+                : itemStatusError
+                  ? "Status unavailable"
+                  : status?.status || "Pending";
+              const statusColor =
+                statusLabel === "Paid"
+                  ? "success"
+                  : statusLabel === "Partially Paid"
+                    ? "info"
+                    : statusLabel === "Reconciliation Required" ||
+                        statusLabel === "Status unavailable"
+                      ? "danger"
+                      : "warning";
+              return (
+                <tr key={idx}>
+                  <td>{item.description}</td>
+                  <td>{formatCurrency(parseFloat(item.amount) || 0)}</td>
+                  <td>
+                    <MDBBadge color={statusColor} pill>
+                      {statusLabel === "Paid" ? (
+                        <>
+                          <i className="fas fa-check-circle me-1"></i>
+                          Paid
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-clock me-1"></i>
+                          {statusLabel}
+                        </>
+                      )}
+                    </MDBBadge>
+                  </td>
+                </tr>
+              );
+            })}
             <tr className="fw-bold">
               <td className="text-end">Total:</td>
               <td>{formatCurrency(parseFloat(total) || 0)}</td>
+              <td></td>
             </tr>
+            {waiverAmount > 0 && (
+              <tr>
+                <td className="text-end">Waiver:</td>
+                <td className="text-success">
+                  - {formatCurrency(waiverAmount)}
+                </td>
+                <td></td>
+              </tr>
+            )}
+            {waiverAmount > 0 && (
+              <tr className="fw-bold">
+                <td className="text-end">Amount After Waiver:</td>
+                <td>{formatCurrency(netTotal)}</td>
+                <td></td>
+              </tr>
+            )}
           </MDBTableBody>
         </MDBTable>
         {/* Buttons */}
@@ -175,7 +288,7 @@ const SchInvoicePage = () => {
                   data,
                   "Printing",
                   "Please wait...",
-                  "receipt.pdf"
+                  "receipt.pdf",
                 );
               }}
               className="me-2"
@@ -198,7 +311,7 @@ const SchInvoicePage = () => {
                     data,
                     "Printing",
                     "Please wait...",
-                    "invoice.pdf"
+                    "invoice.pdf",
                   );
                 }}
                 className="btn btn-info mx-2"

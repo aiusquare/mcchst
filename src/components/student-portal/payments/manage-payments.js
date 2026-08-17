@@ -5,8 +5,9 @@ import request from "superagent";
 import { loader } from "../../LoadingSpinner";
 import { Toast } from "../../errorNotifier";
 import Swal from "sweetalert2";
-import { baseUrl, paystackPublicKey } from "../../../services/setup";
+import { baseUrl, getPaystackPublicKey } from "../../../services/setup";
 import usePostFetch from "../../../hooks/usePostFetch";
+import { usePaystack } from "../../../hooks/usePaystack";
 
 const StudentPaymentsDashboard = () => {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ const StudentPaymentsDashboard = () => {
 
   const netBalance = wallet - outstanding;
   const userEmail = localStorage.getItem("userEmail");
+
+  const { ready: paystackReady, openPaystack } = usePaystack();
 
   const handleFetchData = async () => {
     const invoiceData = {
@@ -76,23 +79,12 @@ const StudentPaymentsDashboard = () => {
     handleFetchData();
   }, []);
 
-  useEffect(() => {
-    // Inject Paystack script if not already present
-    if (!document.getElementById("paystack-script")) {
-      const script = document.createElement("script");
-      script.src = "https://js.paystack.co/v1/inline.js";
-      script.id = "paystack-script";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
   const initializePayment = async () => {
-    if (!window.PaystackPop) {
+    if (!paystackReady) {
       return Swal.fire(
-        "Error",
-        "Payment service not loaded. Please refresh the page.",
-        "error"
+        "Payment Service Not Ready",
+        "Please wait a moment and try again.",
+        "warning"
       );
     }
 
@@ -131,29 +123,32 @@ const StudentPaymentsDashboard = () => {
       }
 
       let paymentRef = response.body.pay_id;
-      // localStorage.setItem("paymentRef", paymentRef);
+      const activePaystackKey = getPaystackPublicKey();
 
-      const payData = {
-        key: paystackPublicKey,
+      const result = openPaystack({
+        key: activePaystackKey,
         email: userEmail,
         amount: parseInt(fundAmount * 100, 10),
         currency: "NGN",
-        reference: paymentRef,
-        onClose: () => {
+        ref: paymentRef,
+        callback: (resp) => processPayment(resp.reference, userEmail),
+        onClose: () =>
           alert(
             "Wait! Don't leave, if you have already started the payment process."
-          );
-        },
-        callback: (response) => {
-          processPayment(response.reference, userEmail);
-        },
-      };
+          ),
+      });
 
-      // console.log("Pay data", payData);
-
-      const handler = window.PaystackPop.setup(payData);
-
-      handler.openIframe();
+      if (!result.opened) {
+        const reasonText =
+          result.reason === "live_key_on_localhost"
+            ? "Live key cannot run on localhost. Use test key or run via an HTTPS domain."
+            : result.message || result.reason || "unknown error";
+        Swal.fire(
+          "Payment Error",
+          `Could not open payment popup: ${reasonText}`,
+          "error"
+        );
+      }
     } catch (err) {
       Swal.close();
       // console.error("Error generating invoice:", err);

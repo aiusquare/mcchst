@@ -136,6 +136,45 @@ export default function AdmissionTab() {
     }
   };
 
+  const handleBulkAdmissionUpload = async (e) => {
+    if (!file) {
+      Swal.fire({
+        title: "Error!",
+        text: "No file selected",
+        icon: "error",
+      });
+      return;
+    }
+
+    loader({
+      title: "Uploading",
+      text: "Please wait...",
+    });
+
+    const formData = new FormData();
+    formData.append("csv", file); // Ensure the name 'csv' matches your PHP script
+
+    try {
+      await request
+        .post(baseUrl + "/admission/bulk_upload")
+        .send(formData)
+        .set("Accept", "application/json");
+
+      Toast.fire({
+        icon: "success",
+        title: "Uploaded successfully",
+      });
+      setFile(null);
+    } catch (err) {
+      // console.error("Error uploading file", err);
+      Swal.fire({
+        title: "Error!",
+        text: "There was an error uploading the file.",
+        icon: "error",
+      });
+    }
+  };
+
   const handleCourseRegUpload = async (e) => {
     if (!courseRegfile) {
       Swal.fire({
@@ -325,7 +364,7 @@ export default function AdmissionTab() {
               />
 
               <MDBBtn
-                onClick={handleSubmit}
+                onClick={handleBulkAdmissionUpload}
                 style={{ background: "#05321e", height: "56px" }}
                 className="p-3"
               >
@@ -515,12 +554,12 @@ const ChangeOfCourse = () => {
         ProgrammeCode: programmeCode,
         ApplicationId: applicationNo,
         Duration: duration,
-        AdmissionNumber: admissionNumber,
+        // AdmissionNumber: admissionNumber,
       };
 
       await request
         .post(
-          "https://api.mcchstfuntua.edu.ng/admin/admission/course_change/index.php"
+          "https://api.mcchstfuntua.edu.ng/admin/admission/course_change/index.php",
         )
         .type("application/json")
         .send(data)
@@ -552,7 +591,7 @@ const ChangeOfCourse = () => {
     setDepartment(selectedDept);
 
     const programmes = admissionProgrammes.find(
-      (dept) => dept.department === selectedDept
+      (dept) => dept.department === selectedDept,
     ).programmes;
 
     setProgramme(programmes[0].programme);
@@ -567,7 +606,7 @@ const ChangeOfCourse = () => {
     setProgramme(selectedProgramme);
 
     const retProgramme = programmesList.find(
-      (programme) => programme.programme === selectedProgramme
+      (programme) => programme.programme === selectedProgramme,
     );
 
     setProgramme(retProgramme.programme);
@@ -595,7 +634,7 @@ const ChangeOfCourse = () => {
 
     await request
       .post(
-        "https://api.mcchstfuntua.edu.ng/admin/admission/course_change/search/index.php"
+        "https://api.mcchstfuntua.edu.ng/admin/admission/course_change/search/index.php",
       )
       .type("application/json")
       .send(data)
@@ -695,7 +734,7 @@ const ChangeOfCourse = () => {
           </MDBCol>
         </MDBRow>
 
-        <MDBRow style={{ paddingRight: "10px", paddingLeft: "10px" }}>
+        {/* <MDBRow style={{ paddingRight: "10px", paddingLeft: "10px" }}>
           <MDBCol>
             <MDBInput
               label="Admission Number"
@@ -706,7 +745,7 @@ const ChangeOfCourse = () => {
               }}
             />
           </MDBCol>
-        </MDBRow>
+        </MDBRow> */}
 
         <MDBRow style={{ paddingRight: "10px" }}>
           <MDBCol>
@@ -776,14 +815,14 @@ const StudentsAdmission = () => {
   const handleGetListForAdmission = async () => {
     try {
       const response = await request.get(
-        "https://api.mcchstfuntua.edu.ng/admin/admission/admit/list_applicants/index.php"
+        "https://api.mcchstfuntua.edu.ng/admin/admission/admit/list_applicants/index.php",
       );
       const fetchedData = response.body || [];
       setAdmissionList(
         fetchedData.map((item) => ({
           ...item,
           TestScore: item.TestScore || "", // Ensure TestScore is initialized
-        }))
+        })),
       );
     } catch (err) {
       Toast.fire({
@@ -876,7 +915,7 @@ const StudentsAdmission = () => {
     setDepartment(selectedDept);
 
     const programmes = admissionProgrammes.find(
-      (dept) => dept.department === selectedDept
+      (dept) => dept.department === selectedDept,
     ).programmes;
 
     setProgramme(programmes[0].programme);
@@ -891,7 +930,7 @@ const StudentsAdmission = () => {
     setProgramme(selectedProgramme);
 
     const retProgramme = programmesList.find(
-      (programme) => programme.programme === selectedProgramme
+      (programme) => programme.programme === selectedProgramme,
     );
 
     setProgramme(retProgramme.programme);
@@ -903,8 +942,8 @@ const StudentsAdmission = () => {
     const newValue = e.target.value;
     setAdmissionList((prevList) =>
       prevList.map((item, idx) =>
-        idx === index ? { ...item, TestScore: newValue } : item
-      )
+        idx === index ? { ...item, TestScore: newValue } : item,
+      ),
     );
   };
 

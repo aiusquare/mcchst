@@ -16,8 +16,8 @@
 .index .LOGO-MCCHST {
   height: 180px;
   position: relative;
-  margin: 20px;
-  margin-bottom: 50px;
+  display: block;
+  margin: 20px auto 50px;
   width: 180px;
   cursor: pointer;
 }

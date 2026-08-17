@@ -24,6 +24,7 @@ export default function SelectionBox(props) {
         ref={refNav}
         value={props.value}
         label={props.label}
+        disabled={props.disabled}
         onChange={(e) => {
           props.changed(e.target.value);
         }}

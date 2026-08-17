@@ -12,6 +12,7 @@ export const useUserForm = (initialValues = {}) => {
     isOfficer: false,
     office: "",
     department: "",
+    additionalPages: [],
     ...initialValues,
   });
 
@@ -29,6 +30,20 @@ export const useUserForm = (initialValues = {}) => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleAdditionalPageToggle = (path) => {
+    setFormData((prev) => {
+      const currentPages = prev.additionalPages || [];
+      const additionalPages = currentPages.includes(path)
+        ? currentPages.filter((page) => page !== path)
+        : [...currentPages, path];
+
+      return {
+        ...prev,
+        additionalPages,
+      };
+    });
   };
 
   const handleAccessChange = (value) => {
@@ -52,6 +67,7 @@ export const useUserForm = (initialValues = {}) => {
       accessMode: !prev.hasAdminAccess ? prev.accessMode : "",
       isOfficer: false,
       office: "",
+      additionalPages: !prev.hasAdminAccess ? prev.additionalPages : [],
     }));
   };
 
@@ -69,5 +85,6 @@ export const useUserForm = (initialValues = {}) => {
     handleAccessChange,
     handleAdminAccessToggle,
     handleOfficerToggle,
+    handleAdditionalPageToggle,
   };
 };

@@ -6,6 +6,7 @@ import AboutUs from "./components/about";
 import { EmailVarificationComponent } from "./components/email-varification/Index";
 import { LoginComponent } from "./components/login/Index";
 import Registration from "./components/registration/Registration";
+import NinVerification from "./components/registration/NinVerification";
 import { ApplyComponent } from "./components/apply/apply";
 import ApplicantProfile from "./components/user-profile/applicant_profile";
 import DashBoard from "./components/admin";
@@ -19,7 +20,6 @@ import { PayNow } from "./components/payment/pay";
 import { ForgetPasswordComponent } from "./components/forget-password/Index";
 import { UsersPage } from "./features/users";
 import SiteAdminTab from "./components/admin/site_admin_component";
-import CreateUserTab from "./components/admin/create_users";
 import ProtectedUrlRoute from "./components/admin/protectedUrlRoute";
 import AdmissionTab from "./components/admin/admissionComponents";
 import { AdmissionComponent } from "./components/registration/stage-one/admission";
@@ -45,8 +45,10 @@ import InvoicePage from "./components/student-portal/invoices/invoice";
 import InvoiceList from "./components/student-portal/invoices/invoices";
 import AdminPasswordCreationForm from "./components/create-password";
 import StudentPaymentsDashboard from "./components/student-portal/payments/manage-payments";
+import UndertakingPage from "./components/student-portal/undertakings/UndertakingPage";
 import ListOfAdminInvoices from "./components/admin/pages/list-of-invoices";
 import StudentTransactionsList from "./pages/students/payments/transactons/Transactions";
+import AcademicSessionManagement from "./pages/admin/academic-session-management";
 import EditInvoice from "./pages/admin/finance/EditInvoice";
 import EditUserPage from "./features/users/pages/EditUserPage";
 import CreateUser from "./features/users/components/CreateUser";
@@ -54,9 +56,43 @@ import UpdateCsvUploaded from "./pages/students/registration/data_update/UpdateC
 import Scholarship from "./pages/admin/officers/Registrar/Scholarship";
 import SchInvoicePage from "./pages/admin/officers/Registrar/SchInvoice";
 import InvoicesReport from "./features/finance/components/InvoicesReport";
+import RegistrarUndertakings from "./components/admin/officers-tabs/registrar";
+import UndertakingTrackerPage from "./pages/admin/officers/UndertakingTrackerPage";
 import DocumentRequirements from "./features/officers/components/RegistrarPanel/DocumentRequirements";
+import HODReports from "./features/officers/hod/HODReports";
+import StudentsAdmission from "./features/officers/hod/StudentAdmission";
+import RegistrarAdmissions from "./features/officers/registrar/RegistrarAdmissions";
+import HODHostelReports from "./features/officers/hod/HODHostelReports";
+import FundsTransfer from "./features/finance/components/FundsTransfer";
+import ManualPayment from "./features/finance/components/ManualPayment";
+import SettlementCreation from "./features/finance/components/SettlementCreation";
+import AccountReconciliation from "./features/finance/components/AccountReconciliation";
+import InvoiceSyncPage from "./features/finance/components/InvoiceSyncPage";
+import CourseManagement from "./features/officers/hod/CourseManagement";
+import StudentCourseRegistration from "./pages/students/registration/CourseRegistration";
+import RegistrarClearance from "./features/clearance/RegistrarClearance";
+import SAOClearance from "./features/clearance/SAOClearance";
+import AccountClearance from "./features/clearance/AccountClearance";
+import HODClearance from "./features/clearance/HODClearance";
+import StationariesRegistration from "./features/registrar/StationariesRegistration";
+import StationaryCollection from "./features/account/StationaryCollection";
+import StudentClearance from "./components/student-portal/clearance/StudentClearance";
+import VerifyClearance from "./pages/clearance/VerifyClearance";
+import ExitCardList from "./features/hostel/ExitCardList";
+import StudentsFinancesReport from "./features/finance/components/StudentsFinancesReport";
+import StudentsIdCard from "./pages/admin/students-id-card/StudentsIdCard";
+import MaintenancePage from "./components/maintenance/MaintenancePage";
+
+const getMaintenanceMode = () => {
+  const config = window.MCCHST_MAINTENANCE || {};
+  return config.enabled === true && config.restoreFullFunction !== true;
+};
 
 function App() {
+  if (getMaintenanceMode()) {
+    return <MaintenancePage />;
+  }
+
   return (
     <div className="App">
       <Routes>
@@ -86,6 +122,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AcceptanceAuthPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="registration/nin-verification"
+          element={
+            <ProtectedRoute>
+              <NinVerification />
             </ProtectedRoute>
           }
         />
@@ -199,6 +243,14 @@ function App() {
             }
           />
           <Route
+            path="academic-session-management"
+            element={
+              <ProtectedUrlRoute>
+                <AcademicSessionManagement />
+              </ProtectedUrlRoute>
+            }
+          />
+          <Route
             path="admission"
             element={
               <ProtectedUrlRoute>
@@ -233,10 +285,37 @@ function App() {
           />
 
           <Route
+            path="finance/settlement-creation"
+            element={
+              <ProtectedUrlRoute>
+                <SettlementCreation />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
             path="create-invoice"
             element={
               <ProtectedUrlRoute>
                 <CreateInvoice />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="student-finance-report"
+            element={
+              <ProtectedUrlRoute>
+                <StudentsFinancesReport />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="account-reconciliation"
+            element={
+              <ProtectedUrlRoute>
+                <AccountReconciliation />
               </ProtectedUrlRoute>
             }
           />
@@ -278,6 +357,154 @@ function App() {
           />
 
           <Route
+            path="invoice-sync"
+            element={
+              <ProtectedUrlRoute>
+                <InvoiceSyncPage />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          {/* HOD shortcut into undertaking queue (defaults to HOD stage) */}
+          <Route
+            path="hod-undertakings"
+            element={
+              <ProtectedUrlRoute>
+                <RegistrarUndertakings stage="hod" />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          {/* Registrar shortcut into undertaking queue (defaults to Registrar stage) */}
+          <Route
+            path="registrar-undertakings"
+            element={
+              <ProtectedUrlRoute>
+                <RegistrarUndertakings stage="registrar" />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          {/* Quality Assurance undertaking reports – expiry tracking */}
+          <Route
+            path="undertaking-reports"
+            element={
+              <ProtectedUrlRoute>
+                <UndertakingTrackerPage />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          {/* Registrar admission approvals */}
+          <Route
+            path="registrar-admissions"
+            element={
+              <ProtectedUrlRoute>
+                <RegistrarAdmissions />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="registrar-clearance"
+            element={
+              <ProtectedUrlRoute>
+                <RegistrarClearance />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="registrar-stationaries"
+            element={
+              <ProtectedUrlRoute>
+                <StationariesRegistration />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="account-clearance"
+            element={
+              <ProtectedUrlRoute>
+                <AccountClearance />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="stationary-collection"
+            element={
+              <ProtectedUrlRoute>
+                <StationaryCollection />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="sao-clearance"
+            element={
+              <ProtectedUrlRoute>
+                <SAOClearance />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="hod-clearance"
+            element={
+              <ProtectedUrlRoute>
+                <HODClearance />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="hostel-reports"
+            element={
+              <ProtectedUrlRoute>
+                <HODHostelReports />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="exit-card-list"
+            element={
+              <ProtectedUrlRoute>
+                <ExitCardList />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="students-id-card"
+            element={
+              <ProtectedUrlRoute>
+                <StudentsIdCard />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="funds-transfer"
+            element={
+              <ProtectedUrlRoute>
+                <FundsTransfer />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="manual-payment"
+            element={
+              <ProtectedUrlRoute>
+                <ManualPayment />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
             path="users"
             element={
               <ProtectedUrlRoute>
@@ -314,6 +541,33 @@ function App() {
           />
 
           <Route
+            path="dept-reports"
+            element={
+              <ProtectedUrlRoute>
+                <HODReports />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="confirm-admission"
+            element={
+              <ProtectedUrlRoute>
+                <StudentsAdmission />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
+            path="course-management"
+            element={
+              <ProtectedUrlRoute>
+                <CourseManagement />
+              </ProtectedUrlRoute>
+            }
+          />
+
+          <Route
             path="view-invoice"
             element={
               <ProtectedUrlRoute>
@@ -339,7 +593,7 @@ function App() {
             }
           />
         </Route>
-        // students portal
+        {/* students portal */}
         <Route
           path="portal"
           element={
@@ -359,11 +613,18 @@ function App() {
             path="manage-payments"
             element={<StudentPaymentsDashboard />}
           />
+          <Route path="undertakings" element={<UndertakingPage />} />
+          <Route
+            path="course-registration"
+            element={<StudentCourseRegistration />}
+          />
+          <Route path="clearance" element={<StudentClearance />} />
         </Route>
         <Route path="contact" element={<ContactUs />} />
         <Route path="about" element={<AboutUs />} />
         <Route path="varify-email" element={<EmailVarificationComponent />} />
         <Route path="apply" element={<ApplyComponent />} />
+        <Route path="verify-clearance" element={<VerifyClearance />} />
         <Route path="pay" element={<PayNow />} />
         <Route path="forget-password" element={<ForgetPasswordComponent />} />
         <Route path="upload" element={<IdImageUpload />} />

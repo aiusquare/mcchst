@@ -18,15 +18,95 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Chip, Divider } from "@mui/material";
+import {
+  ADMIN_PAGE_ACCESS_OPTIONS,
+  getStoredAdditionalPages,
+} from "../../utils/access-control";
+
+const ACCOUNT_OFFICER_ROLES = ["accounting", "account-officer"];
+const pageLabels = ADMIN_PAGE_ACCESS_OPTIONS.flatMap((group) => group.pages).reduce(
+  (labels, page) => ({
+    ...labels,
+    [page.path]: page.label,
+  }),
+  {}
+);
+
+const toAdminRelativePath = (path) => path.replace(/^\/admin\/?/, "");
 
 const SideNavBar = () => {
   const { collapsed, toggleSidebar } = useProSidebar();
   const navigate = useNavigate();
+  const userAccess = localStorage.getItem("access");
+  const officeRole = localStorage.getItem("officeRole");
+  const isAccountOfficer =
+    userAccess === "accounting" ||
+    (userAccess === "officer" && ACCOUNT_OFFICER_ROLES.includes(officeRole));
+  const additionalPages = getStoredAdditionalPages();
 
   const handleAccess = (loc) => {
     toggleSidebar();
     navigate(loc);
   };
+
+  const additionalMenuPages = additionalPages.filter(
+    (path) => path !== "/admin/invoices-report"
+  );
+
+  const renderAdditionalPagesMenu = () =>
+    additionalMenuPages.length > 0 && (
+      <SubMenu
+        icon={<BarIcons img={settingsIcon} />}
+        label="Added Access"
+        style={{ textAlign: "left" }}
+      >
+        {additionalMenuPages.map((path) => (
+          <MenuItem
+            key={path}
+            style={{ textAlign: "left" }}
+            onClick={() => {
+              handleAccess(toAdminRelativePath(path));
+            }}
+          >
+            {pageLabels[path] || path}
+          </MenuItem>
+        ))}
+      </SubMenu>
+    );
+
+  if (isAccountOfficer) {
+    return (
+      <div style={{ display: "flex" }}>
+        <Sidebar
+          breakPoint="sm"
+          transitionDuration={800}
+          style={{ background: "#feffff" }}
+        >
+          <Menu>
+            <div style={{ display: "flex" }}>
+              <AppLogo />
+            </div>
+
+            <div className="mt-4">{!collapsed && <UserGreatings />}</div>
+
+            <Divider className="my-1" />
+
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("invoices-report");
+              }}
+              icon={<BarIcons img={financeIcon} />}
+            >
+              Invoices Report
+            </MenuItem>
+
+            {renderAdditionalPagesMenu()}
+          </Menu>
+        </Sidebar>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex" }}>
@@ -75,6 +155,14 @@ const SideNavBar = () => {
             >
               List of Applicants
             </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("academic-session-management");
+              }}
+            >
+              Academic Session Management
+            </MenuItem>
           </SubMenu>
 
           <SubMenu
@@ -107,6 +195,15 @@ const SideNavBar = () => {
             >
               Registered Students
             </MenuItem>
+
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("students-id-card");
+              }}
+            >
+              Students ID Card
+            </MenuItem>
           </SubMenu>
 
           <SubMenu
@@ -119,19 +216,73 @@ const SideNavBar = () => {
               onClick={() => {
                 handleAccess("finance");
               }}
-              // icon={<BarIcons img={financeIcon} />}
             >
               Manage Payment
             </MenuItem>
             <MenuItem
               style={{ textAlign: "left" }}
               onClick={() => {
+                handleAccess("finance/settlement-creation");
+              }}
+            >
+              Settlement Creation
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
                 handleAccess("invoices-report");
               }}
-              icon={<i class="bi bi-dot"></i>}
             >
               Invoices Report
             </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("invoice-sync");
+              }}
+            >
+              Invoice Sync
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("student-finance-report");
+              }}
+            >
+              Students Finance Report
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("account-reconciliation");
+              }}
+            >
+              Account Reconciliation
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("hostel-reports");
+              }}
+            >
+              Hostel Reports
+            </MenuItem>
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("funds-transfer");
+              }}
+            >
+              Funds Transfer
+            </MenuItem>
+            {/* <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("manual-payment");
+              }}
+            >
+              Manual Payment
+            </MenuItem> */}
             <MenuItem
               style={{ textAlign: "left" }}
               onClick={() => {
@@ -162,8 +313,25 @@ const SideNavBar = () => {
           </MenuItem>
 
           <SubMenu
+            icon={<BarIcons img={settingsIcon} />}
+            label="Quality Assurance"
+            style={{ textAlign: "left" }}
+          >
+            <MenuItem
+              style={{ textAlign: "left" }}
+              onClick={() => {
+                handleAccess("undertaking-reports");
+              }}
+            >
+              Reports of Undertakings
+            </MenuItem>
+          </SubMenu>
+
+          {renderAdditionalPagesMenu()}
+
+          <SubMenu
             icon={<BarIcons img={usersIcon} />}
-            label="Officers"
+            label="Office"
             style={{ textAlign: "left" }}
           >
             {localStorage.getItem("officeRole") === "hod" && (
@@ -171,10 +339,36 @@ const SideNavBar = () => {
                 <MenuItem
                   style={{ textAlign: "left" }}
                   onClick={() => {
-                    handleAccess("hod");
+                    handleAccess("dept-reports");
                   }}
                 >
-                  Admission confirmation
+                  Dept Report
+                </MenuItem>
+
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("confirm-admission");
+                  }}
+                >
+                  Student Admission
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("hod-clearance");
+                  }}
+                >
+                  Clearance
+                </MenuItem>
+
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("course-management");
+                  }}
+                >
+                  Course Management
                 </MenuItem>
 
                 <MenuItem
@@ -183,7 +377,16 @@ const SideNavBar = () => {
                     handleAccess("hod");
                   }}
                 >
-                  Clearance
+                  Results
+                </MenuItem>
+
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("hod-undertakings");
+                  }}
+                >
+                  Undertakings
                 </MenuItem>
               </>
             )}
@@ -200,7 +403,7 @@ const SideNavBar = () => {
                 <MenuItem
                   style={{ textAlign: "left" }}
                   onClick={() => {
-                    handleAccess("sao");
+                    handleAccess("sao-clearance");
                   }}
                 >
                   Clearance
@@ -228,10 +431,26 @@ const SideNavBar = () => {
                 <MenuItem
                   style={{ textAlign: "left" }}
                   onClick={() => {
-                    handleAccess("registerer");
+                    handleAccess("registrar-clearance");
                   }}
                 >
-                  Clearance
+                  Registrar Clearance
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("registrar-stationaries");
+                  }}
+                >
+                  Stationaries Registration
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("exit-card-list");
+                  }}
+                >
+                  Exit Card List
                 </MenuItem>
                 <MenuItem
                   style={{ textAlign: "left" }}
@@ -248,6 +467,44 @@ const SideNavBar = () => {
                   }}
                 >
                   Registration Documents
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("registrar-admissions");
+                  }}
+                >
+                  Admission Approvals
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("registrar-undertakings");
+                  }}
+                >
+                  Undertakings
+                </MenuItem>
+              </>
+            )}
+            {["accounting", "finance", "bs", "account-officer"].includes(
+              localStorage.getItem("officeRole") || ""
+            ) && (
+              <>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("account-clearance");
+                  }}
+                >
+                  Accounts Clearance
+                </MenuItem>
+                <MenuItem
+                  style={{ textAlign: "left" }}
+                  onClick={() => {
+                    handleAccess("stationary-collection");
+                  }}
+                >
+                  Stationary Collection
                 </MenuItem>
               </>
             )}
@@ -288,6 +545,7 @@ const AppLogo = () => {
         <img
           style={{ cursor: "pointer", width: "50px", height: "50px" }}
           src={logo}
+          alt="MCCHST logo"
         />
 
         {!collapsed && (
@@ -306,6 +564,7 @@ const BarIcons = (props) => {
       className="circle"
       style={{ width: "48px", height: "48px", padding: "15px" }}
       src={props.img}
+      alt=""
     />
   );
 };
@@ -321,7 +580,7 @@ const UserGreatings = () => {
       minute: "numeric",
       second: "numeric",
       hour12: true,
-      timeZone: "Africa/Lagos", // Set the time zone to Lagos
+      timeZone: "Africa/Lagos",
     });
     const time = formatter.format(date).split(" ")[1];
     const hour = formatter.format(date).split(" ")[0];

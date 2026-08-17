@@ -10,8 +10,6 @@ import {
   MDBTableBody,
   MDBBtn,
   MDBInput,
-  MDBRow,
-  MDBCol,
 } from "mdb-react-ui-kit";
 import {
   Grid,
@@ -95,7 +93,7 @@ const AdmissionConfirmation = () => {
         return;
       }
 
-      const response = await fetch(baseUrl + `Officers/hod_confirm_candidate`, {
+      const response = await fetch(baseUrl + `officers/hod_confirm_candidate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

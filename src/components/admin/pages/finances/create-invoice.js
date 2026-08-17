@@ -13,7 +13,7 @@ import {
   MDBRow,
 } from "mdb-react-ui-kit";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import request from "superagent";
 import { loader } from "../../../LoadingSpinner.js";
 import Swal from "sweetalert2";
@@ -29,6 +29,73 @@ import {
 } from "@mui/material";
 import { baseUrl } from "../../../../services/setup.js";
 
+const asText = (value) =>
+  value === null || value === undefined ? "" : String(value);
+
+const normalizeSettlementAccount = (row) => {
+  const accountNumber = asText(row?.account_number ?? row?.accountNumber);
+  const id = asText(
+    row?.id ??
+      row?.settlement_id ??
+      row?.account_id ??
+      row?.identifier ??
+      accountNumber
+  );
+
+  return {
+    id,
+    accTitle: asText(row?.acc_title ?? row?.account_title ?? row?.accTitle),
+    name: asText(row?.name ?? row?.account_name),
+    bankName: asText(row?.bank_name ?? row?.bankName),
+    accountNumber,
+    code: asText(row?.code ?? row?.bank_code ?? row?.settlement_code),
+  };
+};
+
+const getItemSettlementId = (item) =>
+  asText(item?.settlement_account_id ?? item?.settlementAccountId);
+
+const getItemAmount = (item) =>
+  parseFloat(item?.Fee ?? item?.amount ?? item?.fee ?? 0) || 0;
+
+const calculateTotal = (items) =>
+  items.reduce((sum, item) => sum + getItemAmount(item), 0);
+
+const withSettlementFields = (item, settlementAccount) => ({
+  ...item,
+  settlementAccountId: settlementAccount.id,
+  settlement_account_id: settlementAccount.id,
+  settlementAccountTitle: settlementAccount.accTitle,
+  settlement_account_title: settlementAccount.accTitle,
+  settlementAccountName: settlementAccount.name,
+  settlement_account_name: settlementAccount.name,
+  settlementBankName: settlementAccount.bankName,
+  settlement_bank_name: settlementAccount.bankName,
+  settlementAccountNumber: settlementAccount.accountNumber,
+  settlement_account_number: settlementAccount.accountNumber,
+  settlementCode: settlementAccount.code,
+  settlement_code: settlementAccount.code,
+});
+
+const mapInvoiceItemsForSubmit = (items) =>
+  items.map((item) => ({
+    ...item,
+    settlement_account_id: getItemSettlementId(item),
+    settlement_account_title: asText(
+      item?.settlement_account_title ?? item?.settlementAccountTitle
+    ),
+    settlement_account_name: asText(
+      item?.settlement_account_name ?? item?.settlementAccountName
+    ),
+    settlement_bank_name: asText(
+      item?.settlement_bank_name ?? item?.settlementBankName
+    ),
+    settlement_account_number: asText(
+      item?.settlement_account_number ?? item?.settlementAccountNumber
+    ),
+    settlement_code: asText(item?.settlement_code ?? item?.settlementCode),
+  }));
+
 export default function CreateInvoice() {
   const [feesList, setFeesList] = useState([]);
   const [programmesList, setProgrammesList] = useState([]);
@@ -43,7 +110,66 @@ export default function CreateInvoice() {
   const [feeDescription, setFeeDescription] = useState("");
   const [feeAmount, setFeeAmount] = useState("");
   const [invoiceTitle, setInvoiceTitle] = useState("");
+  const [invoicePriorityCode, setInvoicePriorityCode] = useState("");
+  const [priority, setPriority] = useState(0);
+  const [useExistingCode, setUseExistingCode] = useState(false);
+  const [existingCodes, setExistingCodes] = useState([]);
+  const [selectedExistingCode, setSelectedExistingCode] = useState("");
   const [totalInvoiceAmount, setTotalInvoiceAmount] = useState(0);
+  const [settlementAccounts, setSettlementAccounts] = useState([]);
+  const [selectedSettlementAccountId, setSelectedSettlementAccountId] =
+    useState("");
+  const [loadingSettlementAccounts, setLoadingSettlementAccounts] =
+    useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [studentLookupLoading, setStudentLookupLoading] = useState(false);
+  const [creatingInvoice, setCreatingInvoice] = useState(false);
+  const creatingInvoiceRef = useRef(false);
+
+  useEffect(() => {
+    const loadExistingCodes = async () => {
+      try {
+        const response = await request
+          .get(baseUrl + "invoices/get_invoice_list/")
+          .type("application/json");
+        setExistingCodes(Array.isArray(response.body) ? response.body : []);
+      } catch (err) {
+        console.log("Failed to load invoice codes", err?.response ?? err);
+      }
+    };
+
+    const loadSettlementAccounts = async () => {
+      try {
+        setLoadingSettlementAccounts(true);
+        const response = await request
+          .get(baseUrl + "finance/list_settlement_accounts")
+          .type("application/json");
+        const responseBody = response.body;
+        const rows = Array.isArray(responseBody)
+          ? responseBody
+          : Array.isArray(responseBody?.data)
+          ? responseBody.data
+          : Array.isArray(responseBody?.rows)
+          ? responseBody.rows
+          : [];
+
+        const normalizedAccounts = rows
+          .map(normalizeSettlementAccount)
+          .filter((account) => account.id !== "");
+        setSettlementAccounts(normalizedAccounts);
+        if (normalizedAccounts.length > 0) {
+          setSelectedSettlementAccountId(normalizedAccounts[0].id);
+        }
+      } catch (err) {
+        console.log("Failed to load settlement accounts", err?.response ?? err);
+      } finally {
+        setLoadingSettlementAccounts(false);
+      }
+    };
+
+    loadExistingCodes();
+    loadSettlementAccounts();
+  }, []);
 
   const handleDepartmentChange = (e) => {
     const selectedDept = e.target.value;
@@ -92,6 +218,13 @@ export default function CreateInvoice() {
 
   const createInvoice = async () => {
     if (navigator.onLine) {
+      if (creatingInvoiceRef.current) {
+        return;
+      }
+
+      creatingInvoiceRef.current = true;
+      setCreatingInvoice(true);
+
       // progress spinner
       loader({
         title: "Creating",
@@ -99,7 +232,7 @@ export default function CreateInvoice() {
       });
 
       const incoiceData = {
-        invoiceItems: feesList,
+        invoiceItems: mapInvoiceItemsForSubmit(feesList),
         target: target,
         targetSession: targetSession,
         specificTarget: specificTarget,
@@ -109,28 +242,35 @@ export default function CreateInvoice() {
         deptSession: deptSession,
         studentId: studentId,
         invoiceTitle: invoiceTitle,
+        invoicePriorityCode: invoicePriorityCode,
+        priority: priority,
       };
 
-      await request
-        .post(baseUrl + "invoices/generate_invoice")
-        .type("application/json")
-        .send(incoiceData)
-        .then((response) => {
-          Toast.fire({
-            icon: "success",
-            title: "Invoice created successfully",
-          });
-        })
-        .catch((err) => {
-          // let errorText = err.response.text;
-          console.log("Error message:", err.response);
+      try {
+        await request
+          .post(baseUrl + "invoices/generate_invoice")
+          .withCredentials()
+          .type("application/json")
+          .send(incoiceData)
+          .then(() => {
+            Toast.fire({
+              icon: "success",
+              title: "Invoice created successfully",
+            });
+          })
+          .catch((err) => {
+            console.log("Error message:", err.response);
 
-          Swal.fire({
-            title: "Error!",
-            text: "There is occoured an error",
-            icon: "error",
+            Swal.fire({
+              title: "Error!",
+              text: "There is occoured an error",
+              icon: "error",
+            });
           });
-        });
+      } finally {
+        creatingInvoiceRef.current = false;
+        setCreatingInvoice(false);
+      }
     } else {
       Toast.fire({
         icon: "error",
@@ -139,11 +279,85 @@ export default function CreateInvoice() {
     }
   };
 
+  const searchStudent = async () => {
+    if (studentId.trim() === "") {
+      Toast.fire({
+        icon: "error",
+        title: "Enter a student ID/email/matric/app number",
+      });
+      return;
+    }
+
+    try {
+      setStudentLookupLoading(true);
+      const response = await request
+        .post(baseUrl + "invoices/get_student_profile_for_invoice")
+        .type("application/json")
+        .send({ studentId });
+
+      const data = response.body?.data;
+      if (!data) {
+        setStudentProfile(null);
+        Toast.fire({ icon: "error", title: "Student not found" });
+        return;
+      }
+
+      setStudentProfile(data);
+      if (data.Email) {
+        setStudentId(data.Email);
+      }
+
+      Toast.fire({ icon: "success", title: "Student found" });
+    } catch (err) {
+      console.error("Failed to fetch student profile", err?.response ?? err);
+      setStudentProfile(null);
+      Toast.fire({ icon: "error", title: "Search failed" });
+    } finally {
+      setStudentLookupLoading(false);
+    }
+  };
+
   const handleCreateInvoice = () => {
     if (feesList.length === 0) {
       Toast.fire({
         icon: "error",
         title: "No fees added",
+      });
+      return;
+    }
+
+    const hasItemWithoutSettlement = feesList.some(
+      (item) => getItemSettlementId(item) === ""
+    );
+
+    if (hasItemWithoutSettlement) {
+      Toast.fire({
+        icon: "error",
+        title: "Every invoice item must have a settlement account",
+      });
+      return;
+    }
+
+    if (invoiceTitle === "") {
+      Toast.fire({
+        icon: "error",
+        title: "Invoice title is required",
+      });
+      return;
+    }
+
+    if (useExistingCode && selectedExistingCode === "") {
+      Toast.fire({
+        icon: "error",
+        title: "Select an existing invoice code",
+      });
+      return;
+    }
+
+    if (!useExistingCode && invoicePriorityCode === "") {
+      Toast.fire({
+        icon: "error",
+        title: "Invoice priority code is required (e.g., IV001)",
       });
       return;
     }
@@ -228,6 +442,99 @@ export default function CreateInvoice() {
             />
           </MDBCol>
         </MDBRow>
+        <MDBRow className="mt-3">
+          <MDBCol>
+            <RadioGroup
+              row
+              value={useExistingCode ? "existing" : "new"}
+              onChange={(e) => {
+                const value = e.target.value;
+                const isExisting = value === "existing";
+                setUseExistingCode(isExisting);
+                if (isExisting) {
+                  setSelectedExistingCode("");
+                  setInvoicePriorityCode("");
+                  setPriority(0);
+                }
+              }}
+            >
+              <FormControlLabel
+                value="new"
+                control={<Radio />}
+                label="Create new code"
+              />
+              <FormControlLabel
+                value="existing"
+                control={<Radio />}
+                label="Use existing code"
+              />
+            </RadioGroup>
+          </MDBCol>
+        </MDBRow>
+        {useExistingCode && (
+          <MDBRow className="mt-3">
+            <MDBCol>
+              <FormControl fullWidth>
+                <InputLabel>Select existing code</InputLabel>
+                <Select
+                  value={selectedExistingCode}
+                  label="Select existing code"
+                  onChange={(e) => {
+                    const code = e.target.value;
+                    setSelectedExistingCode(code);
+                    const found = existingCodes.find(
+                      (item) => item.invoice_priority_code === code
+                    );
+                    if (found) {
+                      setInvoicePriorityCode(
+                        (found.invoice_priority_code || "").toUpperCase()
+                      );
+                      setPriority(parseInt(found.priority, 10) || 0);
+                    }
+                  }}
+                >
+                  {existingCodes.length === 0 && (
+                    <MenuItem value="" disabled>
+                      No existing codes found
+                    </MenuItem>
+                  )}
+                  {existingCodes.map((item, idx) => (
+                    <MenuItem value={item.invoice_priority_code} key={idx}>
+                      {item.invoice_priority_code} — Priority{" "}
+                      {item.priority ?? 0} — {item.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </MDBCol>
+          </MDBRow>
+        )}
+        <MDBRow className="mt-3">
+          <MDBCol>
+            <MDBInput
+              label="Invoice Priority Code (e.g., IV001, IV002)"
+              value={invoicePriorityCode}
+              type="text"
+              onChange={(e) => {
+                setInvoicePriorityCode(e.target.value.toUpperCase());
+              }}
+              size="lg"
+              disabled={useExistingCode}
+            />
+          </MDBCol>
+          <MDBCol>
+            <MDBInput
+              label="Priority Level (higher = more important)"
+              value={priority}
+              type="number"
+              onChange={(e) => {
+                setPriority(parseInt(e.target.value) || 0);
+              }}
+              size="lg"
+              disabled={useExistingCode}
+            />
+          </MDBCol>
+        </MDBRow>
       </Paper>
 
       <Paper className="p-2 my-2 w-100">
@@ -238,7 +545,7 @@ export default function CreateInvoice() {
         </div>
 
         <MDBRow>
-          <MDBCol>
+          <MDBCol md="4" sm="12" className="mb-2 mb-md-0">
             <MDBInput
               label="description"
               value={feeDescription}
@@ -249,8 +556,8 @@ export default function CreateInvoice() {
               size="lg"
             />
           </MDBCol>
-          <MDBCol>
-            <div className="d-flex align-items-center">
+          <MDBCol md="3" sm="12" className="mb-2 mb-md-0">
+            <div className="d-flex align-items-center h-100">
               <MDBInput
                 label="fee amount"
                 value={feeAmount}
@@ -260,6 +567,38 @@ export default function CreateInvoice() {
                 }}
                 size="lg"
               />
+            </div>
+          </MDBCol>
+          <MDBCol md="5" sm="12">
+            <div className="d-flex align-items-center gap-2">
+              <FormControl fullWidth>
+                <InputLabel>Settlement Account</InputLabel>
+                <Select
+                  value={selectedSettlementAccountId}
+                  label="Settlement Account"
+                  onChange={(e) => {
+                    setSelectedSettlementAccountId(e.target.value);
+                  }}
+                >
+                  {loadingSettlementAccounts && (
+                    <MenuItem value="" disabled>
+                      Loading settlement accounts...
+                    </MenuItem>
+                  )}
+                  {!loadingSettlementAccounts &&
+                    settlementAccounts.length === 0 && (
+                      <MenuItem value="" disabled>
+                        No settlement account found
+                      </MenuItem>
+                    )}
+                  {settlementAccounts.map((account) => (
+                    <MenuItem value={account.id} key={account.id}>
+                      {account.accTitle || account.name} - {account.bankName} (
+                      {account.accountNumber})
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
               <MDBBtn
                 className="w-25"
@@ -274,20 +613,29 @@ export default function CreateInvoice() {
                     return;
                   }
 
-                  const newValue = {
-                    Description: feeDescription,
-                    Fee: feeAmount,
-                  };
+                  const settlementAccount = settlementAccounts.find(
+                    (account) => account.id === selectedSettlementAccountId
+                  );
+
+                  if (!settlementAccount) {
+                    Toast.fire({
+                      icon: "error",
+                      title: "Select a settlement account",
+                    });
+                    return;
+                  }
+
+                  const newValue = withSettlementFields(
+                    {
+                      Description: feeDescription,
+                      Fee: feeAmount,
+                    },
+                    settlementAccount
+                  );
                   const updatedRows = [...feesList];
                   updatedRows.push(newValue);
                   setFeesList(updatedRows);
-
-                  const total = updatedRows.reduce(
-                    (sum, item) => sum + (parseFloat(item.Fee) || 0),
-                    0
-                  );
-
-                  setTotalInvoiceAmount(total);
+                  setTotalInvoiceAmount(calculateTotal(updatedRows));
 
                   setFeeDescription("");
                   setFeeAmount("");
@@ -304,6 +652,7 @@ export default function CreateInvoice() {
               <thead>
                 <tr>
                   <th style={{ width: "auto" }}>Description</th>
+                  <th style={{ width: "auto" }}>Settlement Account</th>
                   <th style={{ width: "auto" }}>Amount</th>
                   <th style={{ width: "10%" }}>Remove</th>
                 </tr>
@@ -314,6 +663,33 @@ export default function CreateInvoice() {
                   return (
                     <tr key={index}>
                       <td>{item.Description}</td>
+                      <td>
+                        <select
+                          className="form-select form-select-sm"
+                          value={getItemSettlementId(item)}
+                          onChange={(e) => {
+                            const selectedAccount = settlementAccounts.find(
+                              (account) => account.id === e.target.value
+                            );
+                            if (!selectedAccount) return;
+
+                            const updatedRows = [...feesList];
+                            updatedRows[index] = withSettlementFields(
+                              updatedRows[index],
+                              selectedAccount
+                            );
+                            setFeesList(updatedRows);
+                          }}
+                        >
+                          <option value="">Select account</option>
+                          {settlementAccounts.map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.accTitle || account.name} -{" "}
+                              {account.bankName} ({account.accountNumber})
+                            </option>
+                          ))}
+                        </select>
+                      </td>
                       <td>₦{item.Fee}</td>
                       <td style={{ textAlign: "center" }}>
                         <div
@@ -332,12 +708,7 @@ export default function CreateInvoice() {
                               updatedRows.splice(index, 1);
                               setFeesList(updatedRows);
 
-                              const total = updatedRows.reduce(
-                                (sum, item) =>
-                                  sum + (parseFloat(item.Fee) || 0),
-                                0
-                              );
-                              setTotalInvoiceAmount(total);
+                              setTotalInvoiceAmount(calculateTotal(updatedRows));
                             }}
                             className="zindex-alert fa-sm"
                             style={{
@@ -354,7 +725,7 @@ export default function CreateInvoice() {
                 })}
                 <tr>
                   {/* <td className="fw-bold"></td> */}
-                  <td colSpan={2} className="fw-bold text-end text-size-5">
+                  <td colSpan={3} className="fw-bold text-end text-size-5">
                     Total:
                   </td>
                   <td> ₦{(parseFloat(totalInvoiceAmount) || 0).toFixed(2)}</td>
@@ -432,9 +803,9 @@ export default function CreateInvoice() {
       {specificTarget === "student" && (
         <Paper className="p-2 my-2 w-100">
           <MDBRow className="m-2" style={{ justifyContent: "flex-start" }}>
-            <MDBCol>
+            <MDBCol md="8" sm="12" className="mb-2 mb-md-0">
               <MDBInput
-                label="Student ID"
+                label="Student ID / Email / Matric / App No"
                 value={studentId}
                 type="text"
                 onChange={(e) => {
@@ -443,7 +814,45 @@ export default function CreateInvoice() {
                 size="lg"
               />
             </MDBCol>
+            <MDBCol
+              md="4"
+              sm="12"
+              className="d-flex align-items-center justify-content-start"
+            >
+              <MDBBtn
+                color="dark"
+                className="w-100"
+                disabled={studentLookupLoading}
+                onClick={searchStudent}
+              >
+                {studentLookupLoading ? "Searching..." : "Search"}
+              </MDBBtn>
+            </MDBCol>
           </MDBRow>
+
+          {studentProfile && (
+            <div
+              className="mt-2 p-3"
+              style={{ background: "#f6f6f6", borderRadius: "8px" }}
+            >
+              <div style={{ fontWeight: "bold" }}>Student details</div>
+              <div>Name: {studentProfile.Fullname || "N/A"}</div>
+              <div>Email: {studentProfile.Email || "N/A"}</div>
+              <div>
+                Programme: {studentProfile.Programme || "N/A"} (
+                {studentProfile.ProgrammeCode || ""})
+              </div>
+              <div>Department: {studentProfile.Department || "N/A"}</div>
+              <div>
+                Session: {studentProfile.SessionOfEntry || "N/A"} • Level:{" "}
+                {studentProfile.Level || "N/A"}
+              </div>
+              <div>
+                Matric: {studentProfile.MatricNumber || "N/A"} • App No:{" "}
+                {studentProfile.ApplicationNo || "N/A"}
+              </div>
+            </div>
+          )}
         </Paper>
       )}
 
@@ -532,8 +941,16 @@ export default function CreateInvoice() {
         </Paper>
       )}
 
-      <div onClick={handleCreateInvoice} className="cus-button w-25 my-2">
-        Create Invoice
+      <div
+        onClick={creatingInvoice ? undefined : handleCreateInvoice}
+        className="cus-button w-25 my-2"
+        aria-disabled={creatingInvoice}
+        style={{
+          opacity: creatingInvoice ? 0.65 : 1,
+          pointerEvents: creatingInvoice ? "none" : "auto",
+        }}
+      >
+        {creatingInvoice ? "Creating Invoice..." : "Create Invoice"}
       </div>
     </div>
   );

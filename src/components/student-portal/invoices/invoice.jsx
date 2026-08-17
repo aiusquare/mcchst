@@ -29,6 +29,22 @@ const InvoicePage = () => {
   const [total, setTotal] = useState(0);
   const [userBalance, setUserBalance] = useState(0);
   const [payCode, setPayCode] = useState("");
+  const [itemPaymentStatus, setItemPaymentStatus] = useState({});
+
+  const invoiceStatus = (invoiceData?.status || "").toLowerCase();
+  const invoiceMode = (invoiceData?.mode || "").toLowerCase();
+  const isPaidInvoice = invoiceStatus === "paid";
+  const isPartialInvoice = invoiceStatus === "partial";
+  const isCanceledInvoice =
+    invoiceStatus === "canceled" || invoiceMode === "canceled";
+  const paidItemTotal = Math.max(
+    parseFloat(invoiceData?.payment_amount) || 0,
+    Object.values(itemPaymentStatus).reduce(
+      (sum, status) => sum + (parseFloat(status?.amount_paid) || 0),
+      0,
+    ),
+  );
+  const outstandingTotal = Math.max(0, total - paidItemTotal);
 
   useEffect(() => {
     if (location.state?.invoiceData) {
@@ -42,17 +58,47 @@ const InvoicePage = () => {
           baseUrl + "invoices/get_invoice_items_by_id/",
           {
             invoiceId: incData.invoice_code,
-          }
+          },
         );
 
         if (invoiceItems) {
           const total = invoiceItems.reduce(
             (sum, item) => sum + (parseFloat(item.amount) || 0),
-            0
+            0,
           );
 
           setTotal(total - (parseFloat(incData.waiver) || 0));
           setInvoiceItems(invoiceItems);
+        }
+      };
+
+      // Fetch payment status for each item
+      const fetchItemPaymentStatus = async () => {
+        try {
+          const response = await request
+            .post(baseUrl + "invoices/get_invoice_items_with_status/")
+            .type("application/json")
+            .send({
+              invoiceId: incData.invoice_code,
+              email: userEmail,
+            });
+
+          if (response.body && response.body.data) {
+            // Map payment status by item_id for quick lookup
+            const statusMap = {};
+            response.body.data.forEach((item) => {
+              statusMap[item.item_id] = {
+                status: item.payment_status,
+                amount_paid: item.amount_paid,
+                paid_at: item.paid_at,
+                transaction_id: item.transaction_id,
+              };
+            });
+            setItemPaymentStatus(statusMap);
+          }
+        } catch (err) {
+          console.log("Error fetching payment status:", err);
+          // Silently fail - not critical if status fetch fails
         }
       };
 
@@ -73,47 +119,89 @@ const InvoicePage = () => {
 
       fetchFeesList();
       fetchBalance();
+      fetchItemPaymentStatus();
+
     }
   }, []);
 
   const handlePayByWallet = async () => {
-    if (userBalance < total) {
+    if (isCanceledInvoice) {
+      Swal.fire(
+        "Invoice Canceled",
+        "This invoice has been canceled and cannot be paid.",
+        "warning",
+      );
+      return;
+    }
+
+    // Check wallet balance for this selected invoice only.
+    if (outstandingTotal <= 0) {
+      Swal.fire("Invoice Paid", "This invoice has no outstanding balance.", "info");
+      return;
+    }
+
+    if (userBalance <= 0) {
       Swal.fire(
         "Insufficient Balance",
-        "You have an insufficient balance, please fund your wallet and continue",
-        "warning"
+        "Your wallet balance cannot settle any item on this invoice. Please fund your wallet to continue.",
+        "warning",
       ).then(() => {
         navigate("/portal/manage-payments");
       });
       return;
     }
 
+    // 4️⃣ Show loader
     loader({
       title: "Processing",
       text: "Please wait while we process your invoice.",
     });
 
+    // 5️⃣ Make payment request
     try {
-      await request
-        .post(baseUrl + "invoices/clear_invoice_by_wallet/")
+      const response = await request
+        .post(`${baseUrl}invoices/clear_invoice_by_wallet/`)
+        .timeout({ response: 10000, deadline: 45000 })
         .type("application/json")
         .send({
           email: userEmail,
           pay_id: invoiceData.pay_id,
+          invoice_code: invoiceData.invoice_code,
           title: invoiceData.title,
         });
+      const result = response.body || {};
+      Swal.close();
 
-      Toast.fire({
-        title: "Success!",
-        text: "Invoice paid successfully",
-        icon: "success",
-      });
+      // 6️⃣ Success feedback
+      if ((result.items_paid || 0) > 0 || result.fully_paid) {
+        Toast.fire({
+          title: result.fully_paid ? "Invoice paid" : "Invoice partially paid",
+          text: result.message || "Payment processed successfully",
+          icon: result.fully_paid ? "success" : "warning",
+        });
+      } else {
+        Swal.fire({
+          title: "Payment not applied",
+          text:
+            result.message ||
+            "Wallet balance could not cover the next unpaid item on this invoice.",
+          icon: "warning",
+        });
+        return;
+      }
 
       navigate("/portal/invoices");
     } catch (err) {
+      Swal.close();
+      const errorBody = err?.response?.body || {};
+      // 7️⃣ Error feedback
       Swal.fire({
         title: "Payment Failed!",
-        text: err?.message || "An unexpected error occurred",
+        text:
+          errorBody.message ||
+          errorBody.error ||
+          err?.message ||
+          "An unexpected error occurred",
         icon: "error",
       });
     }
@@ -138,7 +226,15 @@ const InvoicePage = () => {
         <MDBRow>
           <MDBCol className="w-100 d-flex justify-content-end">
             <MDBBadge
-              color={invoiceData?.status === "PAID" ? "success" : "danger"}
+              color={
+                isPaidInvoice
+                  ? "success"
+                  : isCanceledInvoice
+                    ? "secondary"
+                    : isPartialInvoice
+                      ? "warning"
+                  : "danger"
+              }
               pill
               className="absolute top-0 end-0 w-25 mb-3 p-2"
             >
@@ -146,6 +242,76 @@ const InvoicePage = () => {
             </MDBBadge>
           </MDBCol>
         </MDBRow>
+
+        {/* Clearance Status Summary */}
+        {(() => {
+          const paidItems = Object.values(itemPaymentStatus).filter(
+            (s) => s?.status === "Paid",
+          ).length;
+          const totalItems = invoiceItems.length;
+          const pendingItems = totalItems - paidItems;
+          const clearancePercentage =
+            totalItems > 0 ? Math.round((paidItems / totalItems) * 100) : 0;
+
+          return (
+            <MDBRow
+              className="mb-4 p-3"
+              style={{ backgroundColor: "#f8f9fa", borderRadius: "8px" }}
+            >
+              <MDBCol md="12">
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 className="mb-2" style={{ color: "#333" }}>
+                      <i className="fas fa-tasks me-2"></i>
+                      <strong>Clearance Progress</strong>
+                    </h6>
+                    <p
+                      className="mb-0"
+                      style={{ fontSize: "0.9rem", color: "#666" }}
+                    >
+                      <span style={{ color: "green", fontWeight: "bold" }}>
+                        <i className="fas fa-check-circle me-1"></i>
+                        {paidItems} Paid
+                      </span>
+                      {" | "}
+                      <span style={{ color: "#ff9800", fontWeight: "bold" }}>
+                        <i className="fas fa-clock me-1"></i>
+                        {pendingItems} Pending
+                      </span>
+                      {" | "}
+                      <span style={{ color: "#2196f3", fontWeight: "bold" }}>
+                        {clearancePercentage}% Complete
+                      </span>
+                    </p>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <div
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        borderRadius: "50%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        background: `conic-gradient(
+                        ${clearancePercentage <= 50 ? "#ff9800" : clearancePercentage === 100 ? "#28a745" : "#2196f3"}
+                        0deg ${(clearancePercentage / 100) * 360}deg,
+                        #f0f0f0 ${(clearancePercentage / 100) * 360}deg
+                      )`,
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      {clearancePercentage}%
+                    </div>
+                  </div>
+                </div>
+              </MDBCol>
+            </MDBRow>
+          );
+        })()}
+
         <div className="d-flex justify-content-between mb-4">
           <div>
             <h4 style={{ color: "green", textAlign: "left" }}>
@@ -190,18 +356,38 @@ const InvoicePage = () => {
             <tr className="fw-bold">
               <th style={{ textAlign: "left" }}>Description</th>
               <th style={{ textAlign: "left" }}>Amount</th>
+              <th style={{ textAlign: "left" }}>Status</th>
             </tr>
           </MDBTableHead>
 
           <MDBTableBody>
-            {invoiceItems.map((item, idx) => (
-              <tr key={idx}>
-                <td>{item.description}</td>
-                <td>
-                  {formatCurrency((parseFloat(item.amount) || 0).toFixed(2))}
-                </td>
-              </tr>
-            ))}
+            {invoiceItems.map((item, idx) => {
+              const status = itemPaymentStatus[item.id];
+              const isPaid = status?.status === "Paid";
+              return (
+                <tr key={idx}>
+                  <td>{item.description}</td>
+                  <td>
+                    {formatCurrency((parseFloat(item.amount) || 0).toFixed(2))}
+                  </td>
+                  <td>
+                    <MDBBadge color={isPaid ? "success" : "warning"} pill>
+                      {isPaid ? (
+                        <>
+                          <i className="fas fa-check-circle me-1"></i>
+                          Paid
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-clock me-1"></i>
+                          Pending
+                        </>
+                      )}
+                    </MDBBadge>
+                  </td>
+                </tr>
+              );
+            })}
 
             {invoiceData?.waiver && (
               <tr className="fw-bold">
@@ -211,7 +397,7 @@ const InvoicePage = () => {
                 <td style={{ color: "green" }}>
                   -
                   {formatCurrency(
-                    (parseFloat(invoiceData.waiver) || 0).toFixed(2)
+                    (parseFloat(invoiceData.waiver) || 0).toFixed(2),
                   )}
                 </td>
               </tr>
@@ -221,11 +407,22 @@ const InvoicePage = () => {
               <td className="text-end">Total:</td>
               <td>{formatCurrency((parseFloat(total) || 0).toFixed(2))}</td>
             </tr>
+            {isPartialInvoice && (
+              <tr className="fw-bold">
+                <td className="text-end">Outstanding:</td>
+                <td>
+                  {formatCurrency(
+                    (parseFloat(outstandingTotal) || 0).toFixed(2),
+                  )}
+                </td>
+              </tr>
+            )}
           </MDBTableBody>
         </MDBTable>
+
         {/* Buttons */}
         <div className="text-center mt-4">
-          {invoiceData?.status === "Paid" && (
+          {isPaidInvoice && (
             <MDBBtn
               color="primary"
               onClick={() => {
@@ -235,7 +432,7 @@ const InvoicePage = () => {
                   data,
                   "Printing",
                   "Please wait...",
-                  "receipt.pdf"
+                  "receipt.pdf",
                 );
               }}
               className="me-2"
@@ -244,7 +441,7 @@ const InvoicePage = () => {
             </MDBBtn>
           )}
 
-          {invoiceData?.status !== "Paid" && (
+          {!isPaidInvoice && !isCanceledInvoice && (
             <>
               <button onClick={handlePayByWallet} className="btn btn-primary">
                 Pay Now
@@ -258,7 +455,7 @@ const InvoicePage = () => {
                     data,
                     "Printing",
                     "Please wait...",
-                    "invoice.pdf"
+                    "invoice.pdf",
                   );
                 }}
                 className="btn btn-info mx-2"
@@ -266,6 +463,12 @@ const InvoicePage = () => {
                 Print Invoice
               </button>
             </>
+          )}
+
+          {isCanceledInvoice && (
+            <MDBBadge color="secondary" pill className="p-3">
+              Invoice Canceled
+            </MDBBadge>
           )}
         </div>
       </div>

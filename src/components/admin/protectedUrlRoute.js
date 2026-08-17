@@ -2,6 +2,19 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Toast } from "../errorNotifier";
 import { accessRules } from "../Arrays";
+import {
+  getStoredAdditionalPages,
+  isAdditionalPageAllowed,
+} from "../../utils/access-control";
+
+const ACCOUNT_OFFICER_ROLES = ["accounting", "account-officer"];
+
+const isAccountOfficerRole = (role) => ACCOUNT_OFFICER_ROLES.includes(role);
+
+const isPathAllowed = (access, path) => {
+  if (!access || !accessRules[access]) return false;
+  return accessRules[access].some((allowedPath) => path.startsWith(allowedPath));
+};
 
 const ProtectedUrlRoute = ({ children }) => {
   const location = useLocation();
@@ -9,25 +22,26 @@ const ProtectedUrlRoute = ({ children }) => {
   const userAccess = localStorage.getItem("access");
   const [hasAccess, setHasAccess] = useState(null); // null means loading state
 
-  const isSiteAdmin = userAccess === "siteAdmin";
-
-  const isPathAllowed = (access, path) => {
-    if (!access || !accessRules[access]) return false;
-    return accessRules[access].some((allowedPath) =>
-      path.startsWith(allowedPath)
-    );
-  };
-
-  const isOfficer = () => {
-    const officerRole = localStorage.getItem("officeRole");
-    return officerRole && location.pathname === "/admin/officers";
-  };
-
   useEffect(() => {
+    const officerRole = localStorage.getItem("officeRole");
+    const isSiteAdmin = userAccess === "siteAdmin";
+    const isAccountOfficer =
+      userAccess === "accounting" ||
+      (userAccess === "officer" && isAccountOfficerRole(officerRole));
+    const isOfficer =
+      officerRole &&
+      !isAccountOfficerRole(officerRole) &&
+      location.pathname === "/admin/officers";
+    const hasAdditionalPageAccess = isAdditionalPageAllowed(
+      getStoredAdditionalPages(),
+      location.pathname
+    );
     const allowed =
       isSiteAdmin ||
-      isPathAllowed(userAccess, location.pathname) ||
-      isOfficer();
+      hasAdditionalPageAccess ||
+      (isAccountOfficer
+        ? isPathAllowed("accounting", location.pathname)
+        : isPathAllowed(userAccess, location.pathname) || isOfficer);
 
     const passwordSetup = localStorage.getItem("password_setup");
     if (passwordSetup === "no") {
